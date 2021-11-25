@@ -6,7 +6,7 @@ use arduino_hal::*;
 use panic_halt as _;
 use ufmt::uwriteln;
 
-// #[arduino_hal::entry]
+#[arduino_hal::entry]
 fn main() -> ! {
 	let dp = Peripherals::take().unwrap();
 	let pins = pins!(dp);
@@ -16,17 +16,26 @@ fn main() -> ! {
 	pins.d10.into_output();
 	pins.d11.into_output();
 
-	let tc1 = dp.TC1;
+	let tc1 = dp.TC1; // Get tc1 timer
+	tc1 // https://www.gammon.com.au/images/Arduino/Timer_1.png
+		.tccr1a // Get the tccr1a register
+		.write(|w| w.wgm1().bits(0b01).com1a().bits(0b11).com1b().bits(0b11)); // Write half of fast pwm to 255, inverted d9,d10 outputs
 	tc1
-		.tccr1a
-		.write(|w| w.wgm1().bits(0b01).com1a().bits(0b11).com1b().bits(0b11));
-	tc1.tccr1b.write(|w| w.wgm1().bits(0b01).cs1().bits(0b001));
+		.tccr1b // Get the tccr1b register
+		.write(|w| w.wgm1().bits(0b01).cs1().bits(0b001)); // Write other half of fast pwm to 255, prescaler of 1 (~30khz)
 	uwriteln!(&mut serial, "Configured TC1!\r").void_unwrap();
 
-	let tc2 = dp.TC2;
-	tc2.tccr2a.write(|w| w.wgm2().bits(0b11).com2a().bits(0b11));
-	tc2.tccr2b.write(|w| w.wgm22().bit(false).cs2().bits(0b001));
+	let tc2 = dp.TC2; // Get tc2 timer
+	tc2 // https://www.gammon.com.au/images/Arduino/Timer_2.png
+		.tccr2a // Get the tccr2a register
+		.write(|w| w.wgm2().bits(0b11).com2a().bits(0b11)); // Write 2 lsb of fast pwm to 255, d11 inverted output
+	tc2
+		.tccr2b // Get the tccr2b register
+		.write(|w| w.wgm22().bit(false).cs2().bits(0b001)); // Write 1 msb of fast pwm to 255, prescaler of 1 (~30khz)
 	uwriteln!(&mut serial, "Configured TC2!\r").void_unwrap();
+
+	// That is 2 lines in arduino 😅
+
 	let mut n: u8 = 0;
 	loop {
 		n = if n == 255 { 0 } else { n + 1 };

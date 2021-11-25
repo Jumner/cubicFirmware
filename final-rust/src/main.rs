@@ -1,12 +1,13 @@
 #![no_std]
 #![no_main]
+#![feature(abi_avr_interrupt)]
 
 use arduino_hal::prelude::*;
 use arduino_hal::*;
 use panic_halt as _;
 use ufmt::uwriteln;
 
-#[arduino_hal::entry]
+// #[arduino_hal::entry]
 fn main() -> ! {
 	let dp = Peripherals::take().unwrap();
 	let pins = pins!(dp);
@@ -15,6 +16,10 @@ fn main() -> ! {
 	pins.d9.into_output();
 	pins.d10.into_output();
 	pins.d11.into_output();
+	let inp = pins.d5.into_floating_input();
+	unsafe {
+		avr_device::interrupt::enable();
+	}
 
 	let tc1 = dp.TC1; // Get tc1 timer
 	tc1 // https://www.gammon.com.au/images/Arduino/Timer_1.png
@@ -40,7 +45,8 @@ fn main() -> ! {
 	loop {
 		n = if n == 255 { 0 } else { n + 1 };
 		delay_ms(10);
-		uwriteln!(&mut serial, "{}", n);
+		// uwriteln!(&mut serial, "{}", n);
+		uwriteln!(&mut serial, "{}", inp.is_high());
 
 		tc1.ocr1a.write(|w| unsafe { w.bits(n as u16) });
 		tc1.ocr1b.write(|w| unsafe { w.bits(n as u16) });

@@ -4,18 +4,63 @@
 
 use arduino_hal::prelude::*;
 use arduino_hal::*;
+use core::cell;
 use panic_halt as _;
 use ufmt::uwriteln;
 
-// #[arduino_hal::entry]
+const TIMER_COUNTS: u32 = 125;
+
+const MILLIS_INCREMENT: u32 = 1024 * TIMER_COUNTS / 16000;
+
+static MILLIS_COUNTER: avr_device::interrupt::Mutex<cell::Cell<u32>> =
+	avr_device::interrupt::Mutex::new(cell::Cell::new(0));
+
+fn millis_init(tc0: arduino_hal::pac::TC0) {
+	// Configure the timer for the above interval (in CTC mode)
+	// and enable its interrupt.
+	tc0.tccr0a.write(|w| w.wgm0().ctc());
+	tc0.ocr0a.write(|w| unsafe { w.bits(TIMER_COUNTS as u8) });
+	tc0.tccr0b.write(|w| w.cs0().prescale_1024());
+	tc0.timsk0.write(|w| w.ocie0a().set_bit());
+
+	// Reset the global millisecond counter
+	avr_device::interrupt::free(|cs| {
+		MILLIS_COUNTER.borrow(cs).set(0);
+	});
+}
+
+#[avr_device::interrupt(atmega328p)]
+fn TIMER0_COMPA() {
+	avr_device::interrupt::free(|cs| {
+		let counter_cell = MILLIS_COUNTER.borrow(cs);
+		let counter = counter_cell.get();
+		counter_cell.set(counter + MILLIS_INCREMENT);
+	})
+}
+static mut test: u8 = 0;
+#[avr_device::interrupt(atmega328p)]
+fn PCINT2() {
+	unsafe {
+		test = 5;
+	}
+}
+
+fn millis() -> u32 {
+	avr_device::interrupt::free(|cs| MILLIS_COUNTER.borrow(cs).get())
+}
+
+#[arduino_hal::entry]
 fn main() -> ! {
 	let dp = Peripherals::take().unwrap();
 	let pins = pins!(dp);
 	let mut serial = default_serial!(dp, pins, 57600);
+	millis_init(dp.TC0);
+	unsafe { avr_device::interrupt::enable() }
 
 	pins.d9.into_output();
 	pins.d10.into_output();
 	pins.d11.into_output();
+
 	let inp = pins.d5.into_floating_input();
 
 	let int = dp.EXINT; // Get the interrupt register
@@ -45,9 +90,12 @@ fn main() -> ! {
 	let mut n: u8 = 0;
 	loop {
 		n = if n == 255 { 0 } else { n + 1 };
-		delay_ms(10);
+		delay_ms(1000);
 		// uwriteln!(&mut serial, "{}", n);
-		uwriteln!(&mut serial, "{}", inp.is_high());
+		let time = millis();
+		unsafe {
+			uwriteln!(&mut serial, "{}{}\n{}", inp.is_high(), time, test);
+		}
 
 		tc1.ocr1a.write(|w| unsafe { w.bits(n as u16) });
 		tc1.ocr1b.write(|w| unsafe { w.bits(n as u16) });

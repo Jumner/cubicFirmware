@@ -17,9 +17,10 @@ fn main() -> ! {
 	pins.d10.into_output();
 	pins.d11.into_output();
 	let inp = pins.d5.into_floating_input();
-	unsafe {
-		avr_device::interrupt::enable();
-	}
+
+	let int = dp.EXINT; // Get the interrupt register
+	int.pcicr.write(|w| w.pcie().bits(0b100)); // Enables pcie0
+	int.pcmsk2.write(|w| w.pcint().bits(0b11100000)); // Enables pins 7,6,5 (pcint 23,22,21)
 
 	let tc1 = dp.TC1; // Get tc1 timer
 	tc1 // https://www.gammon.com.au/images/Arduino/Timer_1.png

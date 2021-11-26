@@ -2,6 +2,8 @@
 #![no_main]
 #![feature(abi_avr_interrupt)]
 
+use arduino_hal::hal::port::{PD5, PD6, PD7};
+use arduino_hal::port::mode::Input;
 use arduino_hal::prelude::*;
 use arduino_hal::*;
 use core::cell;
@@ -14,7 +16,18 @@ const MILLIS_INCREMENT: u32 = 1024 * TIMER_COUNTS / 16000;
 
 static MILLIS_COUNTER: avr_device::interrupt::Mutex<cell::Cell<u32>> =
 	avr_device::interrupt::Mutex::new(cell::Cell::new(0));
-
+// static INPUT_PINS: avr_device::interrupt::Mutex<cell::Cell<bool>> =
+// avr_device::interrupt::Mutex::new(cell::Cell::new(false))
+enum InPin {
+	d5(port::Pin<port::mode::Input<port::mode::Floating>, PD5>),
+	d6(port::Pin<port::mode::Input<port::mode::Floating>, PD6>),
+	d7(port::Pin<port::mode::Input<port::mode::Floating>, PD7>),
+	None,
+}
+static STATE: avr_device::interrupt::Mutex<cell::Cell<[bool; 3]>> =
+	avr_device::interrupt::Mutex::new(cell::Cell::new([false; 3]));
+static INPUT_PINS: avr_device::interrupt::Mutex<cell::Cell<[InPin; 3]>> =
+	avr_device::interrupt::Mutex::new(cell::Cell::new([InPin::None; 3]));
 fn millis_init(tc0: arduino_hal::pac::TC0) {
 	// Configure the timer for the above interval (in CTC mode)
 	// and enable its interrupt.
@@ -37,31 +50,31 @@ fn TIMER0_COMPA() {
 		counter_cell.set(counter + MILLIS_INCREMENT);
 	})
 }
-static mut test: u8 = 0;
-#[avr_device::interrupt(atmega328p)]
-fn PCINT2() {
-	unsafe {
-		test = 5;
-	}
-}
 
 fn millis() -> u32 {
 	avr_device::interrupt::free(|cs| MILLIS_COUNTER.borrow(cs).get())
 }
 
-#[arduino_hal::entry]
+// #[arduino_hal::entry]
 fn main() -> ! {
 	let dp = Peripherals::take().unwrap();
-	let pins = pins!(dp);
+	let pins: Pins = pins!(dp);
 	let mut serial = default_serial!(dp, pins, 57600);
 	millis_init(dp.TC0);
-	unsafe { avr_device::interrupt::enable() }
-
+	unsafe {
+		avr_device::interrupt::enable();
+	}
+	avr_device::interrupt::free(|cs| {
+		let inPins = INPUT_PINS.borrow(cs);
+		inPins.set([
+			InPin::d5(pins.d5.into_floating_input()),
+			InPin::d6(pins.d6.into_floating_input()),
+			InPin::d7(pins.d7.into_floating_input()),
+		]);
+	});
 	pins.d9.into_output();
 	pins.d10.into_output();
 	pins.d11.into_output();
-
-	let inp = pins.d5.into_floating_input();
 
 	let int = dp.EXINT; // Get the interrupt register
 	int.pcicr.write(|w| w.pcie().bits(0b100)); // Enables pcie0
@@ -88,14 +101,37 @@ fn main() -> ! {
 	// That is 2 lines in arduino 😅
 
 	let mut n: u8 = 0;
+	static t: u8 = 5;
+	// static MILLIS_COUNTER: avr_device::interrupt::Mutex<cell::Cell<u32>> =
+	// avr_device::interrupt::Mutex::new(cell::Cell::new(0));
+	#[avr_device::interrupt(atmega328p)]
+	fn PCINT2() {
+		// delay_ms(1);
+		avr_device::interrupt::free(|cs| {
+			let pins = INPUT_PINS.borrow(cs);
+			let inp = pins.into_inner();
+			for i in &inp {}
+			// let val = pins.get();
+			// pins.set(!val);
+		});
+		// if p.is_high() {
+		// uwriteln!(&mut serial, "on")
+		// }
+	}
+
 	loop {
 		n = if n == 255 { 0 } else { n + 1 };
-		delay_ms(1000);
+		// delay_ms(100);
 		// uwriteln!(&mut serial, "{}", n);
 		let time = millis();
-		unsafe {
-			uwriteln!(&mut serial, "{}{}\n{}", inp.is_high(), time, test);
-		}
+		avr_device::interrupt::free(|cs| {
+			if (INPUT_PINS.borrow(cs).get()) {
+				uwriteln!(&mut serial, "on");
+			}
+		});
+		// unsafe {
+		// 	uwriteln!(&mut serial, "{}", time);
+		// }
 
 		tc1.ocr1a.write(|w| unsafe { w.bits(n as u16) });
 		tc1.ocr1b.write(|w| unsafe { w.bits(n as u16) });

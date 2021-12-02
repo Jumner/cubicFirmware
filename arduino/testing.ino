@@ -112,7 +112,7 @@ void loop()
 	Serial.print(",");
 	Serial.print(rps1);
 	Serial.print(",");
-	Serial.print(mils);
+	Serial.print(millis() - mils);
 	Serial.println();
 
 	if (mils + 3000 > millis())

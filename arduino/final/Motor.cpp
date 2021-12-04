@@ -59,9 +59,12 @@ void Motor::setTorque(double t)
 		setPwm(255);
 		return;
 	}
-	int val = 245 - 245 * t / (0.0625 - 0.000743 * rps - 0.00000348 * rps * rps + 0.0000000429 * rps * rps * rps);
-	val = max(val, 0);
+	double decimalVal = abs(t / (0.0625 - 0.000743 * rps - 0.00000348 * rps * rps + 0.0000000429 * rps * rps * rps));
+	int val = 245 - 245 * max(min(decimalVal, 1), 0);
 	setPwm(val);
+	Serial.print(val);
+	Serial.print(", ");
+	Serial.println(rps);
 }
 // t = ((245-val)/245) * (0.0625 - 0.0007.43*rps - 0.00000348*rps*rps + 0.0000000429*rps*rps*rps)
 // 245 - 245 * t / (0.0625 - 0.0007.43*rps - 0.00000348*rps*rps + 0.0000000429*rps*rps*rps) = val

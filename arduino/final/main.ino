@@ -15,11 +15,13 @@ void setup()
 	attachPCINT(digitalPinToPCINT(4), int2, CHANGE);
 
 	// cube.motors[0].Print();
-	Serial.println(cube.motors[0].rps);
+	// Serial.println(cube.motors[0].rps);
 }
 
 void loop()
 {
+	cube.motors[0].setTorque(0.005);
+	// Serial.println(cube.motors[0].rps);
 }
 
 void int0(void)

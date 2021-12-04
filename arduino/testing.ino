@@ -54,8 +54,6 @@ void setup()
 
 	Serial.println("Setup pin modes");
 	attachPCINT(digitalPinToPCINT(2), int1, CHANGE);
-	attachPCINT(digitalPinToPCINT(3), int2, CHANGE);
-	attachPCINT(digitalPinToPCINT(4), int3, CHANGE);
 
 	Serial.println("Setup interrupts");
 
@@ -65,15 +63,12 @@ void setup()
 	digitalWrite(5, LOW);
 	digitalWrite(6, LOW);
 	digitalWrite(7, LOW);
+	analogWrite(9, 127);
 	mils = millis();
 }
 
 float rps1 = 0;
-float rps2 = 0;
-float rps3 = 0;
 unsigned long oldTime1 = micros();
-unsigned long oldTime2 = micros();
-unsigned long oldTime3 = micros();
 
 void int1(void)
 {
@@ -84,59 +79,21 @@ void int1(void)
 	}
 }
 
-void int2(void)
-{
-	if (digitalRead(3))
-	{
-		rps2 = 31415.9 / (micros() - oldTime2);
-		oldTime2 = micros();
-	}
-}
-
-void int3(void)
-{
-	if (digitalRead(4))
-	{
-		rps3 = 31415.9 / (micros() - oldTime3);
-		oldTime3 = micros();
-	}
-}
-
-int val = 0;
-float oldSpeed = -1;
-float oldoldSpeed = -1;
-float oldoldoldSpeed = -1;
 void loop()
 {
-	Serial.print(val);
+	if (millis() - mils < 5000)
+	{
+		Serial.print(127);
+	}
+	else
+	{
+		Serial.print(-127);
+		digitalWrite(5, HIGH);
+	}
 	Serial.print(",");
 	Serial.print(rps1);
 	Serial.print(",");
 	Serial.print(millis() - mils);
 	Serial.println();
-
-	if (mils + 3000 > millis())
-	{
-		analogWrite(9, val);
-	}
-	else
-	{
-		if (rps1 == oldoldoldSpeed && rps1 < 1)
-		{
-			mils = millis();
-			if (val >= 255)
-			{
-				Serial.println("Testing has concluded!");
-				while (true)
-				{
-					delay(1000);
-				}
-			}
-			val += 1;
-		}
-		oldSpeed = rps1;
-		oldoldSpeed = oldSpeed;
-		oldoldoldSpeed = oldoldSpeed;
-		analogWrite(9, 255);
-	}
 }
+// (240-val) * (0.0625 - 0.0007.43*vel - 0.00000348*vel*vel + 0.0000000429*vel*vel*vel)

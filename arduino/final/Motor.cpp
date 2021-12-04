@@ -1,0 +1,67 @@
+#include "Motor.h"
+// #include <HardwareSerial.h>
+#include <Arduino.h>
+Motor::Motor(int num)
+{
+	n = num;
+	tach = 2 + n;
+	cw = 5 + n;
+	pwm = 9 + n;
+
+	// Set pin modes
+	pinMode(tach, INPUT_PULLUP);
+	pinMode(cw, OUTPUT);
+	pinMode(pwm, OUTPUT);
+
+	// Set default values
+	digitalWrite(cw, LOW);
+	analogWrite(pwm, 255); // Off
+
+	Print();
+	Serial.println("Constructed Motor");
+}
+
+Motor::~Motor()
+{
+	Serial.println("Destructed Motor");
+}
+
+void Motor::Print()
+{
+	Serial.print("Motor: ");
+	Serial.print(n);
+	Serial.print(", Tachometer: ");
+	Serial.print(tach);
+	Serial.print(", CW/CCW: ");
+	Serial.print(cw);
+	Serial.print(", PWM: ");
+	Serial.println(pwm);
+}
+
+void Motor::interrupt(void)
+{
+	if (digitalRead(tach))
+	{
+		rps = 31415.9 / (micros() - oldTime);
+		oldTime = micros();
+	}
+}
+
+void Motor::setPwm(int val)
+{
+	analogWrite(pwm, val);
+}
+
+void Motor::setTorque(double t)
+{
+	if (t == 0.00)
+	{
+		setPwm(255);
+		return;
+	}
+	int val = 245 - 245 * t / (0.0625 - 0.000743 * rps - 0.00000348 * rps * rps + 0.0000000429 * rps * rps * rps);
+	val = max(val, 0);
+	setPwm(val);
+}
+// t = ((245-val)/245) * (0.0625 - 0.0007.43*rps - 0.00000348*rps*rps + 0.0000000429*rps*rps*rps)
+// 245 - 245 * t / (0.0625 - 0.0007.43*rps - 0.00000348*rps*rps + 0.0000000429*rps*rps*rps) = val

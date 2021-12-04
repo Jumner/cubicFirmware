@@ -6,7 +6,7 @@ class Cubic
 private:
 public:
 	Motor motors[3] = {Motor(0), Motor(1), Motor(2)};
-	Mpu6050 imu;
+	// Mpu6050 imu;
 	Cubic();
 	~Cubic();
 };

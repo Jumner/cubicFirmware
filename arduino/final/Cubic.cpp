@@ -9,7 +9,7 @@ Cubic::Cubic()
 	TCCR2B = TCCR2B & B11111000 | B00000001; // 11
 
 	// Construct imu
-	imu = Mpu6050();
+	// imu = Mpu6050();
 
 	Serial.println("Constructed Cubic");
 }

@@ -20,8 +20,7 @@ void setup()
 
 void loop()
 {
-	cube.motors[0].setTorque(0.005);
-	// Serial.println(cube.motors[0].rps);
+	// cube.motors[0].setTorque(0.005);
 }
 
 void int0(void)

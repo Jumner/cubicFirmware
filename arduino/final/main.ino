@@ -3,6 +3,7 @@
 #include "PinChangeInterrupt.h"
 #include "Mpu6050.h"
 #include <Wire.h>
+Mpu6050 imu;
 Cubic cube;
 void setup()
 {
@@ -11,18 +12,14 @@ void setup()
 
 	Serial.println("yo");
 
-	cube = Cubic();
 	Mpu6050 imu = Mpu6050();
 	imu.printAll();
-	imu.printAll();
-	imu.printAll();
+	cube = Cubic(&imu);
+	cube.imu->printAll();
 	// Attach tachometer interrupts
 	attachPCINT(digitalPinToPCINT(2), int0, CHANGE);
 	attachPCINT(digitalPinToPCINT(3), int1, CHANGE);
 	attachPCINT(digitalPinToPCINT(4), int2, CHANGE);
-
-	// cube.motors[0].Print();
-	// Serial.println(cube.motors[0].rps);
 }
 
 void loop()

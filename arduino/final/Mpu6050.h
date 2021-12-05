@@ -5,12 +5,20 @@ private:
 	int address;
 	void setRegister(int reg);
 	void setRegister(int reg, int val);
+	long gyroXRaw, gyroYRaw, gyroZRaw;
+	long accelXRaw, accelYRaw, accelZRaw;
 
 public:
-	long gyroX, gyroY, gyroZ;
-	long accelX, accelY, accelZ;
+	double gyroX, gyroY, gyroZ;
+	double accelX, accelY, accelZ;
 	Mpu6050();
 	~Mpu6050();
-	void updateGyro();
 	void updateAccel();
+	void updateGyro();
+	void updateAll()
+	{
+		updateAccel();
+		updateGyro();
+	}
+	void printAll();
 };

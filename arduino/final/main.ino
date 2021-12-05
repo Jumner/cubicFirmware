@@ -13,6 +13,9 @@ void setup()
 
 	cube = Cubic();
 	Mpu6050 imu = Mpu6050();
+	imu.printAll();
+	imu.printAll();
+	imu.printAll();
 	// Attach tachometer interrupts
 	attachPCINT(digitalPinToPCINT(2), int0, CHANGE);
 	attachPCINT(digitalPinToPCINT(3), int1, CHANGE);
@@ -50,21 +53,13 @@ Mpu6050::Mpu6050()
 	// 000 00 000. 00 -> 250, 01 -> 500, 10 -> 1000, 11 -> 2000
 	setRegister(0x1C, 0x00); // Set accelerometer to +- 2g
 	// 000 00 000. 00 -> 2g, 01 -> 4g, 10 -> 8g, 11 -> 16g
-	updateGyro();
-	updateAccel();
-	Serial.println(accelX);
-	Serial.println(accelY);
-	Serial.println(accelZ);
-	Serial.println(gyroX);
-	Serial.println(gyroY);
-	Serial.println(gyroZ);
-	// Wire.end();
+
 	Serial.println("Constructed Mpu-6050");
 }
 
 Mpu6050::~Mpu6050()
 {
-	// Wire.end();
+	Wire.end();
 	Serial.println("Destructed Mpu-6050");
 }
 
@@ -91,9 +86,12 @@ void Mpu6050::updateAccel()
 	while (Wire.available() < 6)
 	{
 	}
-	accelX = Wire.read() << 8 | Wire.read();
-	accelY = Wire.read() << 8 | Wire.read();
-	accelZ = Wire.read() << 8 | Wire.read();
+	accelXRaw = Wire.read() << 8 | Wire.read();
+	accelYRaw = Wire.read() << 8 | Wire.read();
+	accelZRaw = Wire.read() << 8 | Wire.read();
+	accelX = 9.8 * accelXRaw / 16384.0;
+	accelY = 9.8 * accelYRaw / 16384.0;
+	accelZ = 9.8 * accelZRaw / 16384.0;
 }
 void Mpu6050::updateGyro()
 {
@@ -103,7 +101,22 @@ void Mpu6050::updateGyro()
 	while (Wire.available() < 6)
 	{
 	}
-	gyroX = Wire.read() << 8 | Wire.read();
-	gyroY = Wire.read() << 8 | Wire.read();
-	gyroZ = Wire.read() << 8 | Wire.read();
+	gyroXRaw = Wire.read() << 8 | Wire.read();
+	gyroYRaw = Wire.read() << 8 | Wire.read();
+	gyroZRaw = Wire.read() << 8 | Wire.read();
+	gyroX = gyroXRaw / 7509.87263606;
+	gyroY = gyroYRaw / 7509.87263606;
+	gyroZ = gyroZRaw / 7509.87263606;
+}
+
+void Mpu6050::printAll()
+{
+	updateAll();
+	Serial.println("MPU-6050 data:");
+	Serial.println(accelX);
+	Serial.println(accelY);
+	Serial.println(accelZ);
+	Serial.println(gyroX);
+	Serial.println(gyroY);
+	Serial.println(gyroZ);
 }

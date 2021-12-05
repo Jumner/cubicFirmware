@@ -3,6 +3,7 @@ class Mpu6050
 {
 private:
 	int address;
+	void setRegister(int reg);
 	void setRegister(int reg, int val);
 
 public:

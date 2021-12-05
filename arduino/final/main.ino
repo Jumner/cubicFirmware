@@ -17,7 +17,7 @@ void setup()
 	cube = Cubic(&imu);
 	cube.imu->printAll();
 	// Attach tachometer interrupts
-	attachPCINT(digitalPinToPCINT(2), int0, CHANGE);
+	attachPCINT(digitalPinToPCINT(8), int0, CHANGE); // Pin 2 is mpu interrupt
 	attachPCINT(digitalPinToPCINT(3), int1, CHANGE);
 	attachPCINT(digitalPinToPCINT(4), int2, CHANGE);
 }
@@ -45,6 +45,7 @@ Mpu6050::Mpu6050()
 {
 	address = 0b1101000;
 	Wire.begin();						 // Join bus as master
+	setRegister(0x6A, 0x40); // Enable Fifo for dmp
 	setRegister(0x6B, 0x00); // Disable sleep from power management register
 	setRegister(0x1B, 0x00); // Set gyro to +- 250 deg/s
 	// 000 00 000. 00 -> 250, 01 -> 500, 10 -> 1000, 11 -> 2000

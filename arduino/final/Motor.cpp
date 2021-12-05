@@ -4,7 +4,7 @@
 Motor::Motor(int num)
 {
 	n = num;
-	tach = 2 + n;
+	tach = n == 0 ? 8 : 2 + n;
 	cw = 5 + n;
 	pwm = 9 + n;
 

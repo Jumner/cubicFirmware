@@ -119,5 +119,7 @@ BLA::Matrix<9, 9> Cubic::solveCare()
 {
 	BLA::Matrix<9, 9> P;
 	// https: //en.wikipedia.org/wiki/Algebraic_Riccati_equation
+	// https://github.com/giacomo-b/CppRobotics/blob/master/include/robotics/linear_control/lqr.hpp shhh 🤫
+	// https://github.com/tomstewart89/StateSpaceControl
 	// AT P + P A - P B R^-1 BT P + Q = 0
 }

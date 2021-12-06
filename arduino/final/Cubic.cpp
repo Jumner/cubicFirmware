@@ -1,33 +1,48 @@
 #include "Motor.h"
 #include "Cubic.h"
 #include <BasicLinearAlgebra.h>
+#include <StateSpaceControl.h>
 
 Cubic::Cubic()
 {
+
 	// Set timers
 	TCCR1B = TCCR1B & B11111000 | B00000001; // 9 & 10
 	TCCR2B = TCCR2B & B11111000 | B00000001; // 11
 
-	// Calculate Matrices
-	CalculateA();
-	CalculateB();
-	CalculateQ();
-	CalculateR();
+	// Create state space model
+
+	model = new Model<9, 3, 9>;
+	model->A = getA();
+	model->B = getB();
+	model->C = getC();
+	model->D = getD();
+
+	// Solve the ricotta 🧀
+
+	BLA::Matrix<9, 9> X = solveDare();
+
+	// Create controller
+
+	controller = new StateSpaceController<9, 3>(*model);
 
 	Serial.println("Constructed Cubic");
 }
 Cubic::~Cubic()
 {
+	delete model;
+	delete controller; // Unallocated that damn memory (even if the program ends right after this lol)
 	Serial.println("Destructed Cubic");
 }
 
-void Cubic::CalculateA()
+BLA::Matrix<9, 9> Cubic::getA()
 {
 	float a = 0;
 	float s = -0.00001; // Small negative
 	float y = mass * 9.81 * l / i[1];
 	float z = mass * 9.81 * l / i[2];
-	A = {0, 0, 0, 1, 0, 0, 0, 0, 0,
+	BLA::Matrix<9, 9> A =
+			{0, 0, 0, 1, 0, 0, 0, 0, 0,
 			 0, 0, 0, 0, 1, 0, 0, 0, 0,
 			 0, 0, 0, 0, 0, 1, 0, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -36,9 +51,10 @@ void Cubic::CalculateA()
 			 0, 0, 0, 0, 0, 0, s, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0, s, 0,
 			 0, 0, 0, 0, 0, 0, 0, 0, s};
+	return A;
 }
 
-void Cubic::CalculateB()
+BLA::Matrix<9, 3> Cubic::getB()
 {
 	float w = 1 / iw;								 // Wheel acceleration
 	float x = -1 / (sqrt(3) * i[0]); // X Acceleration
@@ -46,7 +62,8 @@ void Cubic::CalculateB()
 	float h = 1 / (sqrt(6) * i[1]);	 // Half Y Acceleration
 	float z = -1 / (sqrt(2) * i[2]); // Z Acceleration
 	float n = 1 / (sqrt(2) * i[2]);	 // Negative Z Acceleration (its acc positive)
-	B = {0, 0, 0,
+	BLA::Matrix<9, 3> B =
+			{0, 0, 0,
 			 0, 0, 0,
 			 0, 0, 0,
 			 x, x, x,
@@ -55,10 +72,24 @@ void Cubic::CalculateB()
 			 w, 0, 0,
 			 0, w, 0,
 			 0, 0, w};
+	return B;
 }
 
-void Cubic::CalculateQ()
+BLA::Matrix<9, 9> Cubic::getC()
 {
+	BLA::Identity<9, 9> C;
+	return C;
+}
+
+BLA::Matrix<9, 3> Cubic::getD()
+{
+	BLA::Matrix<9, 3> D;
+	return D;
+}
+
+BLA::Matrix<9, 9> Cubic::getQ()
+{
+	BLA::Matrix<9, 9> Q;
 	Q(0, 0) = 0.1; // Theta x
 	Q(1, 1) = 1;	 // Theta y
 	Q(2, 2) = 1;	 // Theta z
@@ -68,11 +99,18 @@ void Cubic::CalculateQ()
 	Q(6, 6) = 2;	 // W Dot 1
 	Q(7, 7) = 2;	 // W Dot 2
 	Q(8, 8) = 2;	 // W Dot 3
+	return Q;
 }
 
-void Cubic::CalculateR()
+BLA::Matrix<3, 3> Cubic::getR()
 {
+	BLA::Matrix<3, 3> R;
 	R(0, 0) = 0.8; // Torque 1
 	R(1, 1) = 0.8; // Torque 2
 	R(2, 2) = 0.8; // Torque 3
+	return R;
+}
+
+BLA::Matrix<9, 9> Cubic::solveDare()
+{
 }

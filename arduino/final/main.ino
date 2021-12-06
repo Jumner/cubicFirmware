@@ -7,6 +7,7 @@
 #include "Wire.h"
 #endif
 #include <BasicLinearAlgebra.h>
+#include <StateSpaceControl.h>
 
 using namespace BLA;
 
@@ -99,12 +100,12 @@ void setup()
 	}
 
 	// // Matrix stuff
-	Serial << cube.A << '\n';
-	Serial << cube.B << '\n';
-	Serial << cube.C << '\n';
-	Serial << cube.D << '\n';
-	Serial << cube.Q << '\n';
-	Serial << cube.R << '\n';
+	// Serial << cube.A << '\n';
+	// Serial << cube.B << '\n';
+	// Serial << cube.C << '\n';
+	// Serial << cube.D << '\n';
+	// Serial << cube.Q << '\n';
+	// Serial << cube.R << '\n';
 }
 
 void loop()
@@ -155,3 +156,9 @@ void safe(String s)
 		delay(10000);
 	}
 }
+
+// Riccati shit
+
+// J is minimized by input -Kx (u = -Kx)
+// K = R^-1 BT P
+// AT P + P A - P B R^-1 BT P + Q = 0

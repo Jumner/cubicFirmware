@@ -1,5 +1,4 @@
 #include "Motor.h"
-#include <MPU6050_6Axis_MotionApps20.h>
 #include <BasicLinearAlgebra.h>
 
 #pragma once
@@ -8,7 +7,6 @@ class Cubic
 private:
 public:
 	Motor motors[3] = {Motor(0), Motor(1), Motor(2)};
-	MPU6050 *imu = nullptr;
 	BLA::Matrix<9, 9> A;
 	BLA::Matrix<9, 3> B;
 	BLA::Identity<9, 9> C;
@@ -23,6 +21,5 @@ public:
 	void CalculateA();
 	void CalculateB();
 	Cubic();
-	Cubic(MPU6050 *mpu);
 	~Cubic();
 };

@@ -1,18 +1,12 @@
 #include "Motor.h"
 #include "Cubic.h"
-#include "MPU6050_6Axis_MotionApps20.h"
+#include <BasicLinearAlgebra.h>
+
 Cubic::Cubic()
-{
-	// Bruh
-}
-Cubic::Cubic(MPU6050 *mpu)
 {
 	// Set timers
 	TCCR1B = TCCR1B & B11111000 | B00000001; // 9 & 10
 	TCCR2B = TCCR2B & B11111000 | B00000001; // 11
-
-	// Construct imu
-	imu = mpu;
 
 	Serial.println("Constructed Cubic");
 }

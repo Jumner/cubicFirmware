@@ -3,13 +3,15 @@
 #include <PinChangeInterrupt.h>
 #include <I2Cdev.h>
 #include <MPU6050_6Axis_MotionApps20.h>
-#include <Wire.h>
-// #include <BasicLinearAlgebra.h>
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+#include "Wire.h"
+#endif
+#include <BasicLinearAlgebra.h>
 
 using namespace BLA;
 
 MPU6050 imu;
-Cubic cube;
+Cubic cube = Cubic();
 
 // MPU control/status vars
 uint8_t mpuIntStatus;		// holds actual interrupt status byte from MPU
@@ -18,8 +20,9 @@ uint16_t packetSize;		// expected DMP packet size (default is 42 bytes)
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 
 // orientation/motion vars
-Quaternion q;		// [w, x, y, z]         quaternion container
-float euler[3]; // [psi, theta, phi]    Euler angle container
+Quaternion q;			// [w, x, y, z]         quaternion container
+VectorInt16 gyro; // [x, y, z]
+float euler[3];		// [psi, theta, phi]    Euler angle container
 
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
 void dmpDataReady()
@@ -29,14 +32,17 @@ void dmpDataReady()
 
 void setup()
 {
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 	Wire.begin();
-	Wire.setClock(400000);
+	Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
+#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+	Fastwire::setup(400, true);
+#endif
 	Serial.begin(38400);
-	while (!Serial)
-		;
 
 	Serial.println("Initializing MPU-6050");
 	imu.initialize();
+
 	pinMode(2, INPUT); // 6050
 	pinMode(8, INPUT); // tach 0
 	pinMode(3, INPUT); // tach 1
@@ -47,20 +53,23 @@ void setup()
 
 	Serial.println("Connection Successfull");
 
-	Serial.println("Configure gyro range");
+	Serial.println("Configuring Gyro Range");
 	imu.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
 
-	Serial.println("Initializing DPM");
-	// imu.dmpInitialize();
-
-	// supply your own gyro offsets here, scaled for min sensitivity
-	imu.setXGyroOffset(220);
-	imu.setYGyroOffset(76);
-	imu.setZGyroOffset(-85);
-	imu.setZAccelOffset(1788); // 1688 factory default for my test chip
+	Serial.println("Initializing DMP");
+	devStatus = imu.dmpInitialize();
 
 	if (devStatus == 0)
 	{
+
+		Serial.println("Setting Offsets");
+		imu.setXAccelOffset(-206);
+		imu.setYAccelOffset(-453);
+		imu.setZAccelOffset(5040);
+		imu.setXGyroOffset(117);
+		imu.setYGyroOffset(19);
+		imu.setZGyroOffset(15);
+
 		imu.CalibrateAccel(6);
 		imu.CalibrateGyro(6);
 		imu.PrintActiveOffsets();
@@ -80,7 +89,7 @@ void setup()
 
 		Serial.println("DMP setup complete");
 		packetSize = imu.dmpGetFIFOPacketSize();
-		delay(5000);
+		delay(1000);
 	}
 	else
 	{
@@ -89,9 +98,7 @@ void setup()
 		safe(err);
 	}
 
-	cube = Cubic(&imu);
-
-	// Matrix stuff
+	// // Matrix stuff
 	cube.CalculateA();
 	cube.CalculateB();
 	Serial << cube.A << '\n';
@@ -103,12 +110,12 @@ void setup()
 void loop()
 {
 	safe("not gonna do stuff");
-	int16_t gx, gy, gz;
-	imu.getRotation(&gx, &gy, &gz);
 	if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
 	{
 		imu.dmpGetQuaternion(&q, fifoBuffer);
 		imu.dmpGetEuler(euler, &q);
+
+		imu.dmpGetGyro(&gyro, fifoBuffer);
 		Serial.print("Theta\t");
 		Serial.print(euler[0]);
 		Serial.print("\t");
@@ -116,11 +123,11 @@ void loop()
 		Serial.print("\t");
 		Serial.println(euler[2]);
 		Serial.print("Theta Dot\t");
-		Serial.print(gx / 7509.87263606);
+		Serial.print(gyro.x / 7509.87263606);
 		Serial.print("\t");
-		Serial.print(gy / 7509.87263606);
+		Serial.print(gyro.y / 7509.87263606);
 		Serial.print("\t");
-		Serial.println(gz / 7509.87263606);
+		Serial.println(gyro.z / 7509.87263606);
 	}
 	// cube.motors[0].setTorque(0.005);
 }

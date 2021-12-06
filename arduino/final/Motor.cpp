@@ -17,24 +17,24 @@ Motor::Motor(int num)
 	analogWrite(pwm, 255); // Off
 
 	Print();
-	Serial.println("Constructed Motor");
+	// Serial.println("Constructed Motor");
 }
 
 Motor::~Motor()
 {
-	Serial.println("Destructed Motor");
+	// Serial.println("Destructed Motor");
 }
 
 void Motor::Print()
 {
-	Serial.print("Motor: ");
-	Serial.print(n);
-	Serial.print(", Tachometer: ");
-	Serial.print(tach);
-	Serial.print(", CW/CCW: ");
-	Serial.print(cw);
-	Serial.print(", PWM: ");
-	Serial.println(pwm);
+	// Serial.print("Motor: ");
+	// Serial.print(n);
+	// Serial.print(", Tachometer: ");
+	// Serial.print(tach);
+	// Serial.print(", CW/CCW: ");
+	// Serial.print(cw);
+	// Serial.print(", PWM: ");
+	// Serial.println(pwm);
 }
 
 void Motor::interrupt(void)

@@ -3,16 +3,13 @@
 #include <PinChangeInterrupt.h>
 #include <I2Cdev.h>
 #include <MPU6050_6Axis_MotionApps20.h>
-#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 #include "Wire.h"
-#endif
 #include <BasicLinearAlgebra.h>
-#include <StateSpaceControl.h>
 
 using namespace BLA;
 
 MPU6050 imu;
-Cubic cube = Cubic();
+Cubic cube;
 
 // MPU control/status vars
 uint8_t mpuIntStatus;		// holds actual interrupt status byte from MPU
@@ -33,15 +30,12 @@ void dmpDataReady()
 
 void setup()
 {
-#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 	Wire.begin();
 	Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
-#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
-	Fastwire::setup(400, true);
-#endif
 	Serial.begin(38400);
+	cube = Cubic(true);
 
-	Serial.println("Initializing MPU-6050");
+	// Serial.println("Initializing MPU-6050");
 	imu.initialize();
 
 	pinMode(2, INPUT); // 6050
@@ -52,52 +46,49 @@ void setup()
 	if (!imu.testConnection())
 		safe("Connection Failed");
 
-	Serial.println("Connection Successfull");
+	// Serial.println("Connection Successfull");
 
-	Serial.println("Configuring Gyro Range");
+	// Serial.println("Configuring Gyro Range");
 	imu.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
 
-	Serial.println("Initializing DMP");
+	// Serial.println("Initializing DMP");
 	devStatus = imu.dmpInitialize();
 
-	if (devStatus == 0)
-	{
-
-		Serial.println("Setting Offsets");
-		imu.setXAccelOffset(-206);
-		imu.setYAccelOffset(-453);
-		imu.setZAccelOffset(5040);
-		imu.setXGyroOffset(117);
-		imu.setYGyroOffset(19);
-		imu.setZGyroOffset(15);
-
-		imu.CalibrateAccel(6);
-		imu.CalibrateGyro(6);
-		imu.PrintActiveOffsets();
-
-		Serial.println("Enabling DMP");
-		imu.setDMPEnabled(true);
-
-		Serial.println("Enabling interrupts");
-
-		// Attach tachometer interrupts
-		attachInterrupt(digitalPinToInterrupt(2), dmpDataReady, RISING); // 6050
-		attachPCINT(digitalPinToPCINT(8), int0, CHANGE);								 // Pin 2 is mpu interrupt
-		attachPCINT(digitalPinToPCINT(3), int1, CHANGE);
-		attachPCINT(digitalPinToPCINT(4), int2, CHANGE);
-
-		mpuIntStatus = imu.getIntStatus();
-
-		Serial.println("DMP setup complete");
-		packetSize = imu.dmpGetFIFOPacketSize();
-		delay(1000);
-	}
-	else
+	if (devStatus != 0)
 	{
 		String err = "";
 		err = "DMP initialization failed (code: " + String(devStatus) + ")";
 		safe(err);
 	}
+
+	// Serial.println("Setting Offsets");
+	imu.setXAccelOffset(-206);
+	imu.setYAccelOffset(-453);
+	imu.setZAccelOffset(5040);
+	imu.setXGyroOffset(117);
+	imu.setYGyroOffset(19);
+	imu.setZGyroOffset(15);
+
+	imu.CalibrateAccel(6);
+	imu.CalibrateGyro(6);
+	imu.PrintActiveOffsets();
+
+	// Serial.println("Enabling DMP");
+	imu.setDMPEnabled(true);
+
+	// Serial.println("Enabling interrupts");
+
+	// Attach tachometer interrupts
+	attachInterrupt(digitalPinToInterrupt(2), dmpDataReady, RISING); // 6050
+	attachPCINT(digitalPinToPCINT(8), int0, CHANGE);								 // Pin 2 is mpu interrupt
+	attachPCINT(digitalPinToPCINT(3), int1, CHANGE);
+	attachPCINT(digitalPinToPCINT(4), int2, CHANGE);
+
+	mpuIntStatus = imu.getIntStatus();
+
+	// Serial.println("DMP setup complete");
+	packetSize = imu.dmpGetFIFOPacketSize();
+	delay(1000);
 
 	// // Matrix stuff
 	// Serial << cube.A << '\n';
@@ -117,18 +108,18 @@ void loop()
 		imu.dmpGetEuler(euler, &q);
 
 		imu.dmpGetGyro(&gyro, fifoBuffer);
-		Serial.print("Theta\t");
-		Serial.print(euler[0]);
-		Serial.print("\t");
-		Serial.print(euler[1]);
-		Serial.print("\t");
-		Serial.println(euler[2]);
-		Serial.print("Theta Dot\t");
-		Serial.print(gyro.x / 7509.87263606);
-		Serial.print("\t");
-		Serial.print(gyro.y / 7509.87263606);
-		Serial.print("\t");
-		Serial.println(gyro.z / 7509.87263606);
+		// Serial.print("Theta\t");
+		// Serial.print(euler[0]);
+		// Serial.print("\t");
+		// Serial.print(euler[1]);
+		// Serial.print("\t");
+		// Serial.println(euler[2]);
+		// Serial.print("Theta Dot\t");
+		// Serial.print(gyro.x / 7509.87263606);
+		// Serial.print("\t");
+		// Serial.print(gyro.y / 7509.87263606);
+		// Serial.print("\t");
+		// Serial.println(gyro.z / 7509.87263606);
 	}
 	// cube.motors[0].setTorque(0.005);
 }

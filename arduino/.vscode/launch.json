@@ -9,7 +9,7 @@
 			"type": "arduino",
 			"request": "launch",
 			"program": "${file}",
-			"cwd": "${workspaceFolder}",
+			"cwd": "${works paceFolder}",
 			"MIMode": "gdb",
 			"targetArchitecture": "arm",
 			"miDebuggerPath": "",

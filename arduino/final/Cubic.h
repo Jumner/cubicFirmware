@@ -1,6 +1,5 @@
 #include "Motor.h"
 #include <BasicLinearAlgebra.h>
-#include <StateSpaceControl.h>
 
 #pragma once
 class Cubic
@@ -10,8 +9,12 @@ private:
 
 public:
 	Motor motors[3] = {Motor(0), Motor(1), Motor(2)};
-	Model<9, 3, 9> *model;
-	StateSpaceController<9, 3> *controller;
+	BLA::Matrix<9, 9> A;
+	BLA::Matrix<9, 3> B;
+	BLA::Matrix<9, 9> C;
+	BLA::Matrix<9, 3> D;
+	BLA::Matrix<9, 9> Q;
+	BLA::Matrix<3, 3> R;
 
 	// Values
 	float mass = 0.8;				// Mass in kg
@@ -26,5 +29,6 @@ public:
 	BLA::Matrix<9, 9> getQ();
 	BLA::Matrix<3, 3> getR();
 	Cubic();
+	Cubic(bool construct);
 	~Cubic();
 };

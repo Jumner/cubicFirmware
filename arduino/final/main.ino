@@ -99,12 +99,12 @@ void setup()
 	}
 
 	// // Matrix stuff
-	cube.CalculateA();
-	cube.CalculateB();
 	Serial << cube.A << '\n';
 	Serial << cube.B << '\n';
 	Serial << cube.C << '\n';
 	Serial << cube.D << '\n';
+	Serial << cube.Q << '\n';
+	Serial << cube.R << '\n';
 }
 
 void loop()

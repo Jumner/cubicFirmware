@@ -1,5 +1,4 @@
 #include "Motor.h"
-// #include <HardwareSerial.h>
 #include <Arduino.h>
 Motor::Motor(int num)
 {

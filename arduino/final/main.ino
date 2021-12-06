@@ -156,9 +156,3 @@ void safe(String s)
 		delay(10000);
 	}
 }
-
-// Riccati shit
-
-// J is minimized by input -Kx (u = -Kx)
-// K = R^-1 BT P
-// AT P + P A - P B R^-1 BT P + Q = 0

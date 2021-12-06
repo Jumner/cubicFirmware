@@ -6,7 +6,7 @@
 class Cubic
 {
 private:
-	BLA::Matrix<9, 9> solveDare();
+	BLA::Matrix<9, 9> solveCare();
 
 public:
 	Motor motors[3] = {Motor(0), Motor(1), Motor(2)};

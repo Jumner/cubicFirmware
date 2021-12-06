@@ -20,7 +20,11 @@ Cubic::Cubic()
 
 	// Solve the ricotta 🧀
 
-	BLA::Matrix<9, 9> X = solveDare();
+	// J is minimized by input -Kx (u = -Kx)
+	// K = R^-1 BT P
+	// AT P + P A - P B R^-1 BT P + Q = 0
+
+	BLA::Matrix<9, 9> X = solveCare(); // Continuous-time Algebraic Riccati Equation
 
 	// Create controller
 
@@ -111,6 +115,9 @@ BLA::Matrix<3, 3> Cubic::getR()
 	return R;
 }
 
-BLA::Matrix<9, 9> Cubic::solveDare()
+BLA::Matrix<9, 9> Cubic::solveCare()
 {
+	BLA::Matrix<9, 9> P;
+	// https: //en.wikipedia.org/wiki/Algebraic_Riccati_equation
+	// AT P + P A - P B R^-1 BT P + Q = 0
 }

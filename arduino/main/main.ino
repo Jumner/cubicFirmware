@@ -33,9 +33,9 @@ void setup()
 	Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
 	Serial.begin(38400);
 	delay(1000);
-	Serial.println("hello?");
-	Serial << cube.solveCare() << '\n';
-	// Serial.println("Initializing MPU-6050");
+	Serial << cube.getK() << '\n';
+
+	Serial.println("Initializing MPU-6050");
 	imu.initialize();
 
 	pinMode(2, INPUT); // 6050
@@ -46,19 +46,19 @@ void setup()
 	if (!imu.testConnection())
 		safe("Connection Failed");
 
-	// Serial.println("Connection Successfull");
+	Serial.println("Connection Successfull");
 
-	// Serial.println("Configuring Gyro Range");
+	Serial.println("Configuring Gyro Range");
 	imu.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
 
-	// Serial.println("Initializing DMP");
+	Serial.println("Initializing DMP");
 
 	if (imu.dmpInitialize() != 0)
 	{
 		safe("DMP init failed");
 	}
 
-	// Serial.println("Setting Offsets");
+	Serial.println("Setting Offsets");
 	imu.setXAccelOffset(-206);
 	imu.setYAccelOffset(-453);
 	imu.setZAccelOffset(5040);
@@ -70,10 +70,10 @@ void setup()
 	imu.CalibrateGyro(6);
 	imu.PrintActiveOffsets();
 
-	// Serial.println("Enabling DMP");
+	Serial.println("Enabling DMP");
 	imu.setDMPEnabled(true);
 
-	// Serial.println("Enabling interrupts");
+	Serial.println("Enabling interrupts");
 
 	// Attach tachometer interrupts
 	attachInterrupt(digitalPinToInterrupt(2), dmpDataReady, RISING); // 6050
@@ -83,17 +83,9 @@ void setup()
 
 	mpuIntStatus = imu.getIntStatus();
 
-	// Serial.println("DMP setup complete");
+	Serial.println("DMP setup complete");
 	packetSize = imu.dmpGetFIFOPacketSize();
 	delay(1000);
-
-	// // Matrix stuff
-	// Serial << cube.A << '\n';
-	// Serial << cube.B << '\n';
-	// Serial << cube.C << '\n';
-	// Serial << cube.D << '\n';
-	// Serial << cube.Q << '\n';
-	// Serial << cube.R << '\n';
 }
 
 void loop()
@@ -105,18 +97,18 @@ void loop()
 		imu.dmpGetEuler(euler, &q);
 
 		imu.dmpGetGyro(&gyro, fifoBuffer);
-		// Serial.print("Theta\t");
-		// Serial.print(euler[0]);
-		// Serial.print("\t");
-		// Serial.print(euler[1]);
-		// Serial.print("\t");
-		// Serial.println(euler[2]);
-		// Serial.print("Theta Dot\t");
-		// Serial.print(gyro.x / 7509.87263606);
-		// Serial.print("\t");
-		// Serial.print(gyro.y / 7509.87263606);
-		// Serial.print("\t");
-		// Serial.println(gyro.z / 7509.87263606);
+		Serial.print("Theta\t");
+		Serial.print(euler[0]);
+		Serial.print("\t");
+		Serial.print(euler[1]);
+		Serial.print("\t");
+		Serial.println(euler[2]);
+		Serial.print("Theta Dot\t");
+		Serial.print(gyro.x / 7509.87263606);
+		Serial.print("\t");
+		Serial.print(gyro.y / 7509.87263606);
+		Serial.print("\t");
+		Serial.println(gyro.z / 7509.87263606);
 	}
 	// cube.motors[0].setTorque(0.005);
 }

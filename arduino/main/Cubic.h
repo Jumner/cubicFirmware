@@ -22,12 +22,6 @@ public:
 	float i[3] = {1, 1, 1}; // Inertia (x, y, z)
 	float iw = 0.5;					// Wheen inertia
 
-	BLA::Matrix<9, 9> getA();
-	BLA::Matrix<9, 3> getB();
-	BLA::Matrix<9, 9> getC();
-	BLA::Matrix<9, 3> getD();
-	BLA::Matrix<9, 9> getQ();
-	BLA::Matrix<3, 3> getR();
 	Cubic();
 	Cubic(bool construct);
 	~Cubic();

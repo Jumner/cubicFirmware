@@ -13,7 +13,6 @@ Cubic cube;
 
 // MPU control/status vars
 uint8_t mpuIntStatus;		// holds actual interrupt status byte from MPU
-uint8_t devStatus;			// return status after each device operation (0 = success, !0 = error)
 uint16_t packetSize;		// expected DMP packet size (default is 42 bytes)
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 
@@ -52,13 +51,10 @@ void setup()
 	imu.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
 
 	// Serial.println("Initializing DMP");
-	devStatus = imu.dmpInitialize();
 
-	if (devStatus != 0)
+	if (imu.dmpInitialize() != 0)
 	{
-		String err = "";
-		err = "DMP initialization failed (code: " + String(devStatus) + ")";
-		safe(err);
+		safe("DMP init failed");
 	}
 
 	// Serial.println("Setting Offsets");
@@ -91,12 +87,12 @@ void setup()
 	delay(1000);
 
 	// // Matrix stuff
-	// Serial << cube.A << '\n';
-	// Serial << cube.B << '\n';
-	// Serial << cube.C << '\n';
-	// Serial << cube.D << '\n';
-	// Serial << cube.Q << '\n';
-	// Serial << cube.R << '\n';
+	Serial << cube.A << '\n';
+	Serial << cube.B << '\n';
+	Serial << cube.C << '\n';
+	Serial << cube.D << '\n';
+	Serial << cube.Q << '\n';
+	Serial << cube.R << '\n';
 }
 
 void loop()
@@ -141,7 +137,6 @@ void safe(String s)
 { // Put the chip into a safe mode is something unrecoverable goes wrong
 	Serial.print("Fatal Err: ");
 	Serial.println(s);
-	Serial.println("Something went wrong. System is in safe mode");
 	while (true)
 	{
 		delay(10000);

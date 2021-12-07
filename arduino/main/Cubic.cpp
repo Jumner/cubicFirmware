@@ -69,7 +69,7 @@ Cubic::Cubic(bool construct)
 	// K = R^-1 BT P
 	// AT P + P A - P B R^-1 BT P + Q = 0
 
-	// BLA::Matrix<9, 9> X = solveCare(); // Continuous-time Algebraic Riccati Equation
+	BLA::Matrix<9, 9> X = solveCare(); // Continuous-time Algebraic Riccati Equation
 
 	// Serial.println("Constructed Cubic");
 }
@@ -78,29 +78,17 @@ Cubic::~Cubic()
 	// Serial.println("Destructed Cubic");
 }
 
-BLA::Matrix<9, 9> Cubic::getQ()
-{
-
-	return Q;
-}
-
-BLA::Matrix<3, 3> Cubic::getR()
-{
-	BLA::Matrix<3, 3> R;
-	return R;
-}
-
 BLA::Matrix<9, 9> Cubic::solveCare()
 {
-	// BLA::Matrix<9, 9> Q = getQ();
-	// BLA::Matrix<3, 3> RInv = getR();
-	// Invert(RInv);
-	// BLA::Matrix<9, 9> P = Q;
+	BLA::Matrix<3, 3> RInv = R;
+	Invert(RInv);
+	BLA::Matrix<9, 9> P = Q;
 	BLA::Matrix<9, 9> Pn = Q;
-	// for (auto _ = 0; _ < 10; _++)
-	// {
-	// 	Pn = ~model->A * P + P * model->A - P * model->B * RInv * ~model->B * P + Q;
-	// }
+
+	for (auto _ = 0; _ < 10; _++)
+	{
+		Pn = ~A * P + P * A - P * B * RInv * ~B * P + Q;
+	}
 	return Pn;
 	// https://en.wikipedia.org/wiki/Algebraic_Riccati_equation
 	// https://github.com/giacomo-b/CppRobotics/blob/master/include/robotics/linear_control/lqr.hpp shhh 🤫

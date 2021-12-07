@@ -8,8 +8,8 @@
 
 using namespace BLA;
 
+Cubic cube = Cubic();
 MPU6050 imu;
-Cubic cube;
 
 // MPU control/status vars
 uint8_t mpuIntStatus;		// holds actual interrupt status byte from MPU
@@ -32,8 +32,9 @@ void setup()
 	Wire.begin();
 	Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
 	Serial.begin(38400);
-	cube = Cubic(true);
-
+	delay(1000);
+	Serial.println("hello?");
+	Serial << cube.solveCare() << '\n';
 	// Serial.println("Initializing MPU-6050");
 	imu.initialize();
 

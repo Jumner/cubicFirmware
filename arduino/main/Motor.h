@@ -3,14 +3,13 @@
 class Motor
 {
 private:
-	int n;
-	int tach;
-	int cw;
-	int pwm;
+	int tach : 4;
+	int cw : 4;
+	int pwm : 8;
 	unsigned long int oldTime;
 
 public:
-	Motor(int num);
+	Motor(int n);
 	~Motor();
 	void Print();
 	void interrupt();

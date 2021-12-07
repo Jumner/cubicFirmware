@@ -5,18 +5,16 @@
 class Cubic
 {
 private:
-	BLA::Matrix<9, 9> solveCare();
-
 public:
+	BLA::Matrix<9, 9> solveCare();
 	Motor motors[3] = {Motor(0), Motor(1), Motor(2)};
-	BLA::Matrix<9, 9> A;
-	BLA::Matrix<9, 3> B;
-	BLA::Matrix<9, 9> C;
-	BLA::Matrix<9, 3> D;
-	BLA::Matrix<9, 9> Q;
-	BLA::Matrix<3, 3> R;
-
+	BLA::Matrix<3, 9> solveK();
+	BLA::Matrix<9, 9> getA();
+	BLA::Matrix<9, 3> getB();
+	BLA::Matrix<9, 9> getC();
+	BLA::Matrix<9, 3> getD();
+	BLA::Matrix<9, 9> getQ();
+	BLA::Matrix<3, 3> getR();
 	Cubic();
-	Cubic(bool construct);
 	~Cubic();
 };

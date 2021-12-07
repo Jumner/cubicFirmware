@@ -18,7 +18,6 @@
                 "/home/jumner/.arduino15/packages/arduino/hardware/avr/1.8.3/cores/arduino",
                 "/home/jumner/.arduino15/packages/arduino/hardware/avr/1.8.3/variants/standard",
                 "/home/jumner/Arduino/libraries/BasicLinearAlgebra",
-                "/home/jumner/Arduino/libraries/StateSpaceControl",
                 "/home/jumner/Arduino/libraries/PinChangeInterrupt/src",
                 "/home/jumner/Arduino/libraries/I2Cdev",
                 "/home/jumner/.arduino15/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src",

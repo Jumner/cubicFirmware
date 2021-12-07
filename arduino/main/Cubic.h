@@ -16,12 +16,6 @@ public:
 	BLA::Matrix<9, 9> Q;
 	BLA::Matrix<3, 3> R;
 
-	// Values
-	float mass = 0.8;				// Mass in kg
-	float l = 0.4;					// Length of pendulum arm
-	float i[3] = {1, 1, 1}; // Inertia (x, y, z)
-	float iw = 0.5;					// Wheen inertia
-
 	Cubic();
 	Cubic(bool construct);
 	~Cubic();

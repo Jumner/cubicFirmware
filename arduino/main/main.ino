@@ -87,12 +87,12 @@ void setup()
 	delay(1000);
 
 	// // Matrix stuff
-	Serial << cube.A << '\n';
-	Serial << cube.B << '\n';
-	Serial << cube.C << '\n';
-	Serial << cube.D << '\n';
-	Serial << cube.Q << '\n';
-	Serial << cube.R << '\n';
+	// Serial << cube.A << '\n';
+	// Serial << cube.B << '\n';
+	// Serial << cube.C << '\n';
+	// Serial << cube.D << '\n';
+	// Serial << cube.Q << '\n';
+	// Serial << cube.R << '\n';
 }
 
 void loop()

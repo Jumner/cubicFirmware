@@ -2,6 +2,15 @@
 #include "Cubic.h"
 #include <BasicLinearAlgebra.h>
 
+// Values
+#define s -0.00001 // Small neg value
+#define mass 0.8	 // Mass in kg
+#define l 0.4			 // Length of pendulum arm
+#define ix 1			 // Inertia x
+#define iy 1			 // Inertia y
+#define iz 1			 // Inertia z
+#define iw 0.5		 // Wheen inertia
+
 using namespace BLA;
 Cubic::Cubic()
 {
@@ -17,9 +26,9 @@ Cubic::Cubic(bool construct)
 
 	// Create state space model
 	// Serial.println("Creating State Space Model");
-	float s = -0.00001;								// Small negative
-	float y = mass * 9.81 * l / i[1]; // Y Gravity
-	float z = mass * 9.81 * l / i[2]; // Z Gravity
+
+	float y = mass * 9.81 * l / iy; // Y Gravity
+	float z = mass * 9.81 * l / iz; // Z Gravity
 	A = {0, 0, 0, 1, 0, 0, 0, 0, 0,
 			 0, 0, 0, 0, 1, 0, 0, 0, 0,
 			 0, 0, 0, 0, 0, 1, 0, 0, 0,
@@ -29,12 +38,12 @@ Cubic::Cubic(bool construct)
 			 0, 0, 0, 0, 0, 0, s, 0, 0,
 			 0, 0, 0, 0, 0, 0, 0, s, 0,
 			 0, 0, 0, 0, 0, 0, 0, 0, s};
-	float w = 1 / iw;								 // Wheel acceleration
-	float x = -1 / (sqrt(3) * i[0]); // X Acceleration
-	y = -2 / (sqrt(6) * i[1]);			 // Y Acceleration
-	float h = 1 / (sqrt(6) * i[1]);	 // Half Y Acceleration
-	z = -1 / (sqrt(2) * i[2]);			 // Z Acceleration
-	float n = 1 / (sqrt(2) * i[2]);	 // Negative Z Acceleration (its acc positive)
+	float w = 1 / iw;							 // Wheel acceleration
+	float x = -1 / (sqrt(3) * ix); // X Acceleration
+	y = -2 / (sqrt(6) * iy);			 // Y Acceleration
+	float h = 1 / (sqrt(6) * iy);	 // Half Y Acceleration
+	z = -1 / (sqrt(2) * iz);			 // Z Acceleration
+	float n = 1 / (sqrt(2) * iz);	 // Negative Z Acceleration (its acc positive)
 	B = {0, 0, 0,
 			 0, 0, 0,
 			 0, 0, 0,
@@ -85,11 +94,12 @@ BLA::Matrix<9, 9> Cubic::solveCare()
 	BLA::Matrix<9, 9> P = Q;
 	BLA::Matrix<9, 9> Pn = Q;
 
-	for (auto _ = 0; _ < 10; _++)
+	for (uint8_t _ = 0; _ < 10; _++)
 	{
 		Pn = ~A * P + P * A - P * B * RInv * ~B * P + Q;
+		P = Pn;
 	}
-	return Pn;
+	return P;
 	// https://en.wikipedia.org/wiki/Algebraic_Riccati_equation
 	// https://github.com/giacomo-b/CppRobotics/blob/master/include/robotics/linear_control/lqr.hpp shhh 🤫
 	// https://github.com/tomstewart89/StateSpaceControl

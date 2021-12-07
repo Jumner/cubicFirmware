@@ -109,6 +109,7 @@ void loop()
 		Serial.print(gyro.y / 7509.87263606);
 		Serial.print("\t");
 		Serial.println(gyro.z / 7509.87263606);
+		BLA::Array<3> U = cube.getU(euler, gyro);
 	}
 	// cube.motors[0].setTorque(0.005);
 }

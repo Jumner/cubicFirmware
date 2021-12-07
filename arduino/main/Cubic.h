@@ -11,8 +11,8 @@ private:
 public:
 	Motor motors[3] = {Motor(0), Motor(1), Motor(2)};
 	BLA::Matrix<3, 9> getK();
-	BLA::Array<9> getX(float t[3], VectorInt16 td);
-	BLA::Array<3> getU(float t[3], VectorInt16 td);
+	BLA::Matrix<9> getX(float t[3], VectorInt16 td);
+	BLA::Matrix<3> getU(float t[3], VectorInt16 td);
 	Cubic();
 	~Cubic();
 };

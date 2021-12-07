@@ -23,14 +23,14 @@ BLA::Matrix<3, 9> Cubic::getK()
 					-0.57735, 5.5037, -9.5326, -1.5275, 3.1245, -5.4118, 0.33333, -0.66665, 0.33333,
 					-0.57735, 5.5037, 9.5326, -1.5275, 3.1245, 5.4118, 0.33333, 0.33333, -0.66665};
 }
-BLA::Array<9> Cubic::getX(float t[3], VectorInt16 td)
+BLA::Matrix<9> Cubic::getX(float t[3], VectorInt16 td)
 {
-	BLA::Array<9> X = {t[0], t[1], t[2], td.x / 7509.87263606, td.y / 7509.87263606, td.z / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps};
+	BLA::Matrix<9> X = {t[0], t[1], t[2], td.x / 7509.87263606, td.y / 7509.87263606, td.z / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps};
 	return X;
 }
-BLA::Array<3> Cubic::getU(float t[3], VectorInt16 td)
+BLA::Matrix<3> Cubic::getU(float t[3], VectorInt16 td)
 {
-	BLA::Array<9> X = getX(t, td);
-	BLA::Matrix<3, 1> U = -K * X;
+	BLA::Matrix<9> X = getX(t, td); // Note: Arrays are not matrices
+	BLA::Matrix<3> U = -K * X;
 	return U;
 }

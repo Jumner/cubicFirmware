@@ -17,11 +17,11 @@
             "includePath": [
                 "/home/jumner/.arduino15/packages/arduino/hardware/avr/1.8.3/cores/arduino",
                 "/home/jumner/.arduino15/packages/arduino/hardware/avr/1.8.3/variants/standard",
-                "/home/jumner/Arduino/libraries/BasicLinearAlgebra",
-                "/home/jumner/Arduino/libraries/PinChangeInterrupt/src",
+                "/home/jumner/Arduino/libraries/MPU6050",
                 "/home/jumner/Arduino/libraries/I2Cdev",
                 "/home/jumner/.arduino15/packages/arduino/hardware/avr/1.8.3/libraries/Wire/src",
-                "/home/jumner/Arduino/libraries/MPU6050",
+                "/home/jumner/Arduino/libraries/BasicLinearAlgebra",
+                "/home/jumner/Arduino/libraries/PinChangeInterrupt/src",
                 "/home/jumner/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/lib/gcc/avr/7.3.0/include",
                 "/home/jumner/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/lib/gcc/avr/7.3.0/include-fixed",
                 "/home/jumner/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include"

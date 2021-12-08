@@ -87,29 +87,42 @@ void setup()
 	packetSize = imu.dmpGetFIFOPacketSize();
 	delay(1000);
 }
-
+unsigned long time = micros();
 void loop()
 {
-	safe("not gonna do stuff");
+	// safe("not gonna do stuff");
 	if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
 	{
 		imu.dmpGetQuaternion(&q, fifoBuffer);
-		imu.dmpGetEuler(euler, &q);
+		imu.dmpGetEuler(euler, &q);				 // Get euler angles
+		imu.dmpGetGyro(&gyro, fifoBuffer); // Get gyro
+		// Kalman filter stuff
+		double dt = (micros() - time) / (1000000.0); // In secs
+		time = micros();
+		// Calculate A priori (the predicted state based on model)
+		// Note that this is the same as C * aPriori bc C is eye(9)
+		BLA::Matrix<9> aPriori = cube.X + (cube.getA() * cube.X + cube.getB() * cube.U) * dt;
 
-		imu.dmpGetGyro(&gyro, fifoBuffer);
-		Serial.print("Theta\t");
-		Serial.print(euler[0]);
-		Serial.print("\t");
-		Serial.print(euler[1]);
-		Serial.print("\t");
-		Serial.println(euler[2]);
-		Serial.print("Theta Dot\t");
-		Serial.print(gyro.x / 7509.87263606);
-		Serial.print("\t");
-		Serial.print(gyro.y / 7509.87263606);
-		Serial.print("\t");
-		Serial.println(gyro.z / 7509.87263606);
-		BLA::Array<3> U = cube.getU(euler, gyro);
+		cube.measureY(euler, gyro);
+
+		BLA::Matrix<9, 9> Kalman; // Calculate kalman gain matrix
+
+		cube.X = aPriori + Kalman * (cube.Y - aPriori);
+		BLA::Matrix<3>
+				U = cube.getU();
+
+		// Serial.print("Theta\t");
+		// Serial.print(euler[0]);
+		// Serial.print("\t");
+		// Serial.print(euler[1]);
+		// Serial.print("\t");
+		// Serial.println(euler[2]);
+		// Serial.print("Theta Dot\t");
+		// Serial.print(gyro.x / 7509.87263606);
+		// Serial.print("\t");
+		// Serial.print(gyro.y / 7509.87263606);
+		// Serial.print("\t");
+		// Serial.println(gyro.z / 7509.87263606);
 	}
 	// cube.motors[0].setTorque(0.005);
 }

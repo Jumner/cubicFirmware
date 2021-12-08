@@ -1,6 +1,8 @@
 #include <BasicLinearAlgebra.h>
 #include "Kalman.h"
 
+using namespace BLA;
+
 Kalman::Kalman()
 {
 }
@@ -28,7 +30,8 @@ void Kalman::calculateP(BLA::Matrix<9, 9> A)
 
 void Kalman::calculateK()
 {
-	K = (P) / (P + getR()); // whyyyy 😭
+	// K = P / (P + getR()); // whyyyy 😭
+	K = P * Inverse(P + getR()); // 😅
 }
 
 void Kalman::finishP()
@@ -45,10 +48,3 @@ BLA::Matrix<9> Kalman::getPosterior(BLA::Matrix<9> aPriori, BLA::Matrix<9> y, BL
 	BLA::Matrix<9> x = aPriori + K * (y - aPriori); // Profit 💸💸💸💸
 	return x;
 }
-
-/*
-public:
-	Kalman();
-	~Kalman();
-	BLA::Matrix<9, 9> calculateP();
-	*/

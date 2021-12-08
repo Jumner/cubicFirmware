@@ -101,13 +101,10 @@ void loop()
 		time = micros();
 		// Calculate A priori (the predicted state based on model)
 		// Note that this is the same as C * aPriori bc we using full state feedback
-		BLA::Matrix<9> aPriori = cube.X + (cube.getA() * cube.X + cube.getB() * cube.U) * dt;
 
-		cube.measureY(euler, gyro); // Measure the output/state (full state feedback)
+		cube.calculateX(euler, gyro, dt); // Kaaaaaaal?
 
-		cube.X = cube.kalman.getPosterior(aPriori, cube.Y, cube.getA()); // Kalman
-		BLA::Matrix<3>
-				U = cube.getU();
+		BLA::Matrix<3> U = cube.getU();
 
 		// Serial.print("Theta\t");
 		// Serial.print(euler[0]);

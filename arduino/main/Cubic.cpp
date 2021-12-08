@@ -25,6 +25,13 @@ Cubic::~Cubic()
 	// Serial.println("Destructed Cubic");
 }
 
+void Cubic::calculateX(float t[3], VectorInt16 td, float dt)
+{
+	measureY(t, td); // Measure the output/state (full state feedback)
+	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
+	X = kalman.getPosterior(aPriori, Y, getA()); // Kalman
+}
+
 BLA::Matrix<3, 9> Cubic::getK()
 { // This was precomputed with octave (open sauce matlab)
 	return {-0.57735, -11.007, -1.1515e-11, -1.5275, -6.2491, -9.3816e-12, -0.66665, 0.33333, 0.33333,

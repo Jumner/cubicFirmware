@@ -18,8 +18,7 @@ Cubic::Cubic()
 	// Serial.println("Initializing TCCR1B and TCCR2B timer registers");
 	TCCR1B = TCCR1B & B11111000 | B00000001; // 9 & 10
 	TCCR2B = TCCR2B & B11111000 | B00000001; // 11
-	K = getK();
-	// Serial.println("Constructed Cubic");
+																					 // Serial.println("Constructed Cubic");
 }
 Cubic::~Cubic()
 {
@@ -38,7 +37,7 @@ void Cubic::measureY(float t[3], VectorInt16 td)
 }
 BLA::Matrix<3> Cubic::getU()
 {
-	BLA::Matrix<3> U = -K * X;
+	BLA::Matrix<3> U = -getK() * X;
 	return U;
 }
 

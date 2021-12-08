@@ -99,25 +99,12 @@ void loop()
 		// Kalman filter stuff
 		double dt = (micros() - time) / (1000000.0); // In secs
 		time = micros();
-		// Calculate A priori (the predicted state based on model)
-		// Note that this is the same as C * aPriori bc we using full state feedback
 
 		cube.calculateX(euler, gyro, dt); // Kaaaaaaal?
 
 		BLA::Matrix<3> U = cube.getU();
-
-		// Serial.print("Theta\t");
-		// Serial.print(euler[0]);
-		// Serial.print("\t");
-		// Serial.print(euler[1]);
-		// Serial.print("\t");
-		// Serial.println(euler[2]);
-		// Serial.print("Theta Dot\t");
-		// Serial.print(gyro.x / 7509.87263606);
-		// Serial.print("\t");
-		// Serial.print(gyro.y / 7509.87263606);
-		// Serial.print("\t");
-		// Serial.println(gyro.z / 7509.87263606);
+		cube.run(); // "It just works"
+		cube.printState();
 	}
 	// cube.motors[0].setTorque(0.005);
 }

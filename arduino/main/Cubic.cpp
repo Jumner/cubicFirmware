@@ -28,6 +28,9 @@ Cubic::~Cubic()
 void Cubic::calculateX(float t[3], VectorInt16 td, float dt)
 {
 	measureY(t, td); // Measure the output/state (full state feedback)
+
+	// Calculate A priori (the predicted state based on model)
+	// Note that this is the same as C * aPriori bc we using full state feedback
 	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 	X = kalman.getPosterior(aPriori, Y, getA()); // Kalman
 }
@@ -80,4 +83,19 @@ BLA::Matrix<9, 3> Cubic::getB()
 					w, 0, 0,
 					0, w, 0,
 					0, 0, w};
+}
+
+void Cubic::run()
+{
+	BLA::Matrix<3> U = getU();
+	motors[0].setTorque(U(0));
+	motors[1].setTorque(U(1));
+	motors[2].setTorque(U(2));
+	// 🙏
+}
+
+void Cubic::printState()
+{
+	Serial.print("Estimated State: ");
+	Serial << X << '\n';
 }

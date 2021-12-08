@@ -19,6 +19,8 @@ public:
 	BLA::Matrix<9, 9> getA();
 	BLA::Matrix<9, 3> getB();
 	void calculateX(float t[3], VectorInt16 td, float dt);
+	void run();
+	void printState();
 
 	Cubic();
 	~Cubic();

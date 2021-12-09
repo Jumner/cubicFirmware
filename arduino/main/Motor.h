@@ -1,6 +1,6 @@
 #pragma once
 
-class Motor
+class Motor // 18 bytes
 {
 private:
 	unsigned int tach : 4;		 // 0.5 bytes
@@ -11,9 +11,8 @@ private:
 public:
 	Motor(int n);
 	~Motor();
-	void Print();
 	void interrupt();
 	void setPwm(int val);
 	void setTorque(double t);
-	float rps; // 4 bytes
+	double rps; // 8 bytes
 };

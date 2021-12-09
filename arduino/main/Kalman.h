@@ -2,7 +2,7 @@
 
 #pragma once
 
-class Kalman
+class Kalman // 324 bytes
 {
 private:
 	BLA::Matrix<9, 9> P; // 324 bytes

@@ -5,14 +5,14 @@
 using namespace BLA;
 #pragma once
 
-class Cubic
+class Cubic // 462 bytes
 {
 public:
-	Kalman kalman;
+	Kalman kalman;																		// 324 bytes
 	BLA::Matrix<9> X;																	// 36 bytes
 	BLA::Matrix<9> Y;																	// 36 bytes
 	BLA::Matrix<3> U;																	// 12 bytes
-	Motor motors[3] = {Motor(0), Motor(1), Motor(2)}; // 42 bytes
+	Motor motors[3] = {Motor(0), Motor(1), Motor(2)}; // 54 bytes
 	BLA::Matrix<3, 9> getK();
 	void measureY(float t[3], VectorInt16 td);
 	BLA::Matrix<3> getU();

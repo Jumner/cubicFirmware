@@ -8,6 +8,13 @@
 
 using namespace BLA;
 
+/*
+Error codes:
+0: Unassigned
+1: imu connection failed
+2: DMP init failed
+*/
+
 Cubic cube = Cubic();
 MPU6050 imu;
 
@@ -26,16 +33,13 @@ void dmpDataReady()
 {
 	mpuInterrupt = true;
 }
-
 void setup()
 {
 	Wire.begin();
 	Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
 	Serial.begin(38400);
 	delay(1000);
-	Serial << cube.getK() << '\n';
 
-	Serial.println("Initializing MPU-6050");
 	imu.initialize();
 
 	pinMode(2, INPUT); // 6050
@@ -44,21 +48,13 @@ void setup()
 	pinMode(4, INPUT); // tach 2
 
 	if (!imu.testConnection())
-		safe("Connection Failed");
+		safe("1");
 
-	Serial.println("Connection Successfull");
-
-	Serial.println("Configuring Gyro Range");
 	imu.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
 
-	Serial.println("Initializing DMP");
-
 	if (imu.dmpInitialize() != 0)
-	{
-		safe("DMP init failed");
-	}
+		safe("2");
 
-	Serial.println("Setting Offsets");
 	imu.setXAccelOffset(-206);
 	imu.setYAccelOffset(-453);
 	imu.setZAccelOffset(5040);
@@ -70,10 +66,7 @@ void setup()
 	imu.CalibrateGyro(6);
 	imu.PrintActiveOffsets();
 
-	Serial.println("Enabling DMP");
 	imu.setDMPEnabled(true);
-
-	Serial.println("Enabling interrupts");
 
 	// Attach tachometer interrupts
 	attachInterrupt(digitalPinToInterrupt(2), dmpDataReady, RISING); // 6050
@@ -83,14 +76,13 @@ void setup()
 
 	mpuIntStatus = imu.getIntStatus();
 
-	Serial.println("DMP setup complete");
 	packetSize = imu.dmpGetFIFOPacketSize();
 	delay(1000);
 }
 unsigned long time = micros();
 void loop()
 {
-	// safe("not gonna do stuff");
+	safe("not gonna do stuff");
 	if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
 	{
 		imu.dmpGetQuaternion(&q, fifoBuffer);
@@ -106,7 +98,6 @@ void loop()
 		cube.run(); // "It just works"
 		cube.printState();
 	}
-	// cube.motors[0].setTorque(0.005);
 }
 
 void int0(void)

@@ -36,7 +36,8 @@ void dmpDataReady()
 void setup()
 {
 	Wire.begin();
-	Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
+	Wire.setClock(400000);					 // 400kHz I2C clock. Comment this line if having compilation difficulties
+	Wire.setWireTimeout(3000, true); //timeout value in uSec (fixes hang issue)
 	Serial.begin(38400);
 	delay(1000);
 
@@ -62,9 +63,8 @@ void setup()
 	imu.setYGyroOffset(20);
 	imu.setZGyroOffset(15);
 
-	imu.CalibrateAccel(6);
-	imu.CalibrateGyro(6);
-	imu.PrintActiveOffsets();
+	// imu.CalibrateAccel(6);
+	// imu.CalibrateGyro(6);
 
 	imu.setDMPEnabled(true);
 
@@ -82,7 +82,7 @@ void setup()
 unsigned long time = micros();
 void loop()
 {
-	safe("not gonna do stuff");
+	// safe("not gonna do stuff");
 	if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
 	{
 		imu.dmpGetQuaternion(&q, fifoBuffer);
@@ -92,10 +92,9 @@ void loop()
 		double dt = (micros() - time) / (1000000.0); // In secs
 		time = micros();
 
-		cube.calculateX(euler, gyro, dt); // Kaaaaaaal?
-
-		BLA::Matrix<3> U = cube.getU();
-		cube.run(); // "It just works"
+		// cube.calculateX(euler, gyro, dt); // Kaaaaaaal?
+		cube.measureY(euler, gyro);
+		// cube.run(); // "It just works"
 		cube.printState();
 	}
 }

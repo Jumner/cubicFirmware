@@ -87,9 +87,9 @@ BLA::Matrix<9, 3> Cubic::getB()
 void Cubic::run()
 {
 	BLA::Matrix<3> U = getU();
-	motors[0].setTorque(U(0));
-	motors[1].setTorque(U(1));
-	motors[2].setTorque(U(2));
+	// motors[0].setTorque(U(0));
+	// motors[1].setTorque(U(1));
+	// motors[2].setTorque(U(2));
 	// 🙏
 }
 

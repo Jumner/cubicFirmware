@@ -55,11 +55,11 @@ void setup()
 	if (imu.dmpInitialize() != 0)
 		safe("2");
 
-	imu.setXAccelOffset(-206);
-	imu.setYAccelOffset(-453);
-	imu.setZAccelOffset(5040);
-	imu.setXGyroOffset(117);
-	imu.setYGyroOffset(19);
+	imu.setXAccelOffset(-1138);
+	imu.setYAccelOffset(159);
+	imu.setZAccelOffset(3670);
+	imu.setXGyroOffset(116);
+	imu.setYGyroOffset(20);
 	imu.setZGyroOffset(15);
 
 	imu.CalibrateAccel(6);

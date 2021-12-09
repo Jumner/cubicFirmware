@@ -29,9 +29,25 @@ void Cubic::calculateX(float t[3], VectorInt16 td, float dt)
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
 	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
+	signY(aPriori);
 	X = kalman.getPosterior(aPriori, Y, getA()); // Kalman
 }
 
+void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we must add a sign
+{
+	if (aPriori(7) < 0)
+	{
+		Y(7) *= -1;
+	}
+	if (aPriori(8) < 0)
+	{
+		Y(8) *= -1;
+	}
+	if (aPriori(9) < 0)
+	{
+		Y(9) *= -1;
+	}
+}
 BLA::Matrix<3, 9> Cubic::getK()
 { // This was precomputed with octave (open sauce matlab)
 	return {-0.57735, -1144.7, 1.1682e-08, -9.8869, -142.66, 1.46e-09, -0.66664, 0.33336, 0.33336,

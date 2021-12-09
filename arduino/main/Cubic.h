@@ -19,6 +19,7 @@ public:
 	BLA::Matrix<9, 9> getA();
 	BLA::Matrix<9, 3> getB();
 	void calculateX(float t[3], VectorInt16 td, float dt);
+	void signY(BLA::Matrix<9> aPriori);
 	void run();
 	void printState();
 

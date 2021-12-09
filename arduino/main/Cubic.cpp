@@ -3,13 +3,13 @@
 #include <BasicLinearAlgebra.h>
 
 // Values
-#define s -0.00001 // Small neg value
-#define mass 0.8	 // Mass in kg
-#define l 0.4			 // Length of pendulum arm
-#define ix 1			 // Inertia x
-#define iy 1			 // Inertia y
-#define iz 1			 // Inertia z
-#define iw 0.5		 // Wheen inertia
+#define s -0.00001			 // Small neg value
+#define mass 1.199			 // Mass (kg)
+#define l 0.119511505722 // Length of pendulum arm (m)
+#define ix 0.004281			 // Inertia x
+#define iy 0.02183			 // Inertia y
+#define iz 0.02189			 // Inertia z
+#define iw 0.0002504		 // Wheen inertia (kg*m^2)
 
 using namespace BLA;
 Cubic::Cubic()
@@ -37,9 +37,12 @@ void Cubic::calculateX(float t[3], VectorInt16 td, float dt)
 
 BLA::Matrix<3, 9> Cubic::getK()
 { // This was precomputed with octave (open sauce matlab)
-	return {-0.57735, -11.007, -1.1515e-11, -1.5275, -6.2491, -9.3816e-12, -0.66665, 0.33333, 0.33333,
-					-0.57735, 5.5037, -9.5326, -1.5275, 3.1245, -5.4118, 0.33333, -0.66665, 0.33333,
-					-0.57735, 5.5037, 9.5326, -1.5275, 3.1245, 5.4118, 0.33333, 0.33333, -0.66665};
+	return {-0.57735, -1144.7, 1.1682e-08, -9.8869, -142.66, 1.46e-09, -0.66664, 0.33336, 0.33336,
+					-0.57735, 572.37, -992.73, -9.8869, 71.328, -123.88, 0.33336, -0.66664, 0.33336,
+					-0.57735, 572.37, 992.73, -9.8869, 71.328, 123.88, 0.33336, 0.33336, -0.66664};
+	// return {-0.57735, -11.007, -1.1515e-11, -1.5275, -6.2491, -9.3816e-12, -0.66665, 0.33333, 0.33333,
+	// 				-0.57735, 5.5037, -9.5326, -1.5275, 3.1245, -5.4118, 0.33333, -0.66665, 0.33333,
+	// 				-0.57735, 5.5037, 9.5326, -1.5275, 3.1245, 5.4118, 0.33333, 0.33333, -0.66665};
 }
 void Cubic::measureY(float t[3], VectorInt16 td)
 {

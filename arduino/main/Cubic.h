@@ -9,10 +9,10 @@ class Cubic
 {
 public:
 	Kalman kalman;
-	BLA::Matrix<9> X;
-	BLA::Matrix<9> Y;
-	BLA::Matrix<3> U;
-	Motor motors[3] = {Motor(0), Motor(1), Motor(2)};
+	BLA::Matrix<9> X;																	// 36 bytes
+	BLA::Matrix<9> Y;																	// 36 bytes
+	BLA::Matrix<3> U;																	// 12 bytes
+	Motor motors[3] = {Motor(0), Motor(1), Motor(2)}; // 42 bytes
 	BLA::Matrix<3, 9> getK();
 	void measureY(float t[3], VectorInt16 td);
 	BLA::Matrix<3> getU();

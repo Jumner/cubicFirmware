@@ -5,12 +5,11 @@
 class Kalman
 {
 private:
-	BLA::Matrix<9, 9> P;
-	BLA::Matrix<9, 9> K;
+	BLA::Matrix<9, 9> P; // 324 bytes
 	BLA::Matrix<9, 9> getQ();
 	BLA::Matrix<9, 9> getR();
 	void calculateP(BLA::Matrix<9, 9> A);
-	void calculateK();
+	BLA::Matrix<9, 9> getK();
 	void finishP();
 
 public:

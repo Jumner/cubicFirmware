@@ -28,23 +28,21 @@ void Kalman::calculateP(BLA::Matrix<9, 9> A)
 	P = A * P * ~A + getQ();
 }
 
-void Kalman::calculateK()
+BLA::Matrix<9, 9> Kalman::getK()
 {
-	// K = P / (P + getR()); // whyyyy 😭
-	K = P * Inverse(P + getR()); // 😅
+	return P * Inverse(P + getR()); // 😅
 }
 
 void Kalman::finishP()
 {
-	P = (BLA::Identity<9, 9>() - K) * P;
+	P = (BLA::Identity<9, 9>() - getK()) * P; // Calculate the kalman gain matrix (not the feedback gain matrix from lqr)
 }
 
 BLA::Matrix<9> Kalman::getPosterior(BLA::Matrix<9> aPriori, BLA::Matrix<9> y, BLA::Matrix<9, 9> A)
 {
-	calculateP(A); // Calculate the covariance matrix
-	calculateK();	 // Calculate the kalman gain matrix (not the feedback gain matrix from lqr)
-	finishP();		 // Update the covariance matrix
+	calculateP(A);																			 // Calculate the covariance matrix
+	BLA::Matrix<9> x = aPriori + getK() * (y - aPriori); // Profit 💸💸💸💸
+	finishP();																					 // Update the covariance matrix
 
-	BLA::Matrix<9> x = aPriori + K * (y - aPriori); // Profit 💸💸💸💸
 	return x;
 }

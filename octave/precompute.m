@@ -1,12 +1,12 @@
 close all
 % Values
 s = -0.00001; % Small neg value
-mass = 0.8;	 % Mass in kg
-l = 0.4;			 % Length of pendulum arm
-ix = 1;			 % Inertia x
-iy = 1;			 % Inertia y
-iz = 1;			 % Inertia z
-iw = 0.5;		 % Wheen inertia
+mass = 1.199;	      % Mass in kg
+l = 0.119511505722;			 % Length of pendulum arm
+ix = 0.004281;			 % Inertia x
+iy = 0.02183;			 % Inertia y
+iz = 0.02189;			 % Inertia z
+iw = 0.0002504;		 % Wheen inertia
 
 % A
 y = mass * 9.81 * l / iy; % Y Gravity

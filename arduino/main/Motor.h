@@ -3,10 +3,10 @@
 class Motor
 {
 private:
-	int tach : 4;
-	int cw : 4;
-	int pwm : 8;
-	unsigned long int oldTime;
+	unsigned int tach : 4;		 // 0.5 bytes
+	unsigned int cw : 4;			 // 0.5 bytes
+	unsigned int pwm : 8;			 // 1 byte
+	unsigned long int oldTime; // 8 bytes
 
 public:
 	Motor(int n);
@@ -15,5 +15,5 @@ public:
 	void interrupt();
 	void setPwm(int val);
 	void setTorque(double t);
-	double rps;
+	float rps; // 4 bytes
 };

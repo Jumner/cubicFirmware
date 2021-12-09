@@ -25,7 +25,10 @@ BLA::Matrix<9, 9> Kalman::getR()
 
 void Kalman::calculateP(BLA::Matrix<9, 9> A)
 {
-	P = A * P * ~A + getQ();
+	// P = A * P * ~A + getQ();
+	P = A * P;
+	P *= ~A;
+	P += getQ(); // This uses less memory (we only really have 1kb)
 }
 
 BLA::Matrix<9, 9> Kalman::getK()

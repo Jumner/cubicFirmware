@@ -34,11 +34,11 @@ void Motor::setPwm(int val, bool dir)
 {
 	if (dir)
 	{
-		digitalWrite(cw, LOW);
+		digitalWrite(cw, HIGH);
 	}
 	else
 	{
-		digitalWrite(cw, HIGH);
+		digitalWrite(cw, LOW);
 	}
 	analogWrite(pwm, val);
 }
@@ -52,11 +52,11 @@ void Motor::setTorque(double t, double vel)
 	double decimalVal = abs(t / (0.0625 - 0.000743 * vel - 0.00000348 * vel * vel + 0.0000000429 * vel * vel * vel));
 	int val = 245 - 245 * max(min(decimalVal, 1), 0);
 	setPwm(val, t > 0);
-	Serial.print(t);
-	Serial.print(", ");
-	Serial.print(val);
-	Serial.print(", ");
-	Serial.println(vel);
+	// Serial.print(t);
+	// Serial.print(", ");
+	// Serial.print(val);
+	// Serial.print(", ");
+	// Serial.println(vel);
 }
 // t = ((245-val)/245) * (0.0625 - 0.0007.43*rps - 0.00000348*rps*rps + 0.0000000429*rps*rps*rps)
 // 245 - 245 * t / (0.0625 - 0.0007.43*rps - 0.00000348*rps*rps + 0.0000000429*rps*rps*rps) = val

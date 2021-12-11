@@ -13,7 +13,7 @@ public:
 	Motor motors[3] = {Motor(0), Motor(1), Motor(2)}; // 54 bytes
 	BLA::Matrix<3, 9> getK();
 	void measureY(float t[3], VectorInt16 td);
-	BLA::Matrix<3> getU();
+	void calculateU();
 	BLA::Matrix<9, 9> getA();
 	BLA::Matrix<9, 3> getB();
 	void calculateX(float t[3], VectorInt16 td, float dt);

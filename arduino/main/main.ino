@@ -91,10 +91,22 @@ void loop()
 		double dt = (micros() - time) / (1000000.0); // In secs
 		time = micros();
 		cube.run(euler, gyro, dt); // "It just works"
-		// cube.motors[0].setPwm(0, true);
-		// cube.motors[1].setPwm(0, true);
-		// cube.motors[2].setPwm(0, true);
-		cube.printState();
+		// cube.motors[0].setPwm(200, true);
+		// cube.motors[1].setPwm(200, true);
+		// cube.motors[2].setPwm(200, true);
+		// cube.printState();
+		if (cube.motors[0].rps > 75)
+		{
+			safe("m0");
+		}
+		else if (cube.motors[1].rps > 75)
+		{
+			safe("m1");
+		}
+		else if (cube.motors[2].rps > 75)
+		{
+			safe("m2");
+		}
 	}
 }
 
@@ -113,6 +125,9 @@ void int2(void)
 
 void safe(String s)
 { // Put the chip into a safe mode is something unrecoverable goes wrong
+	cube.motors[0].setPwm(255, true);
+	cube.motors[1].setPwm(255, true);
+	cube.motors[2].setPwm(255, true);
 	Serial.print("Fatal Err: ");
 	Serial.println(s);
 	while (true)

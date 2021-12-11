@@ -31,8 +31,8 @@ w = 1 / iw;							 % Wheel acceleration
 x = -1 / (sqrt(3) * ix); % X Acceleration
 y = -2 / (sqrt(6) * iy); % Y Acceleration
 h = 1 / (sqrt(6) * iy);	 % Half Y Acceleration
-z = -1 / (sqrt(2) * iz); % Z Acceleration
-n = 1 / (sqrt(2) * iz);	 % Negative Z Acceleration (its acc positive)
+z = 1 / (sqrt(2) * iz); % Z Acceleration
+n = -1 / (sqrt(2) * iz);	 % Negative Z Acceleration (its acc positive)
 B = [0 0 0;
 		 0 0 0;
 		 0 0 0;
@@ -50,12 +50,12 @@ C = eye(9);
 D = zeros(9,3);
 
 % Q
-Q = [0.00002 0 0 0 0 0 0 0 0;
-		 0 0.05 0 0 0 0 0 0 0;
-		 0 0 0.05 0 0 0 0 0 0;
-		 0 0 0 0.00005 0 0 0 0 0;
-		 0 0 0 0 1 0 0 0 0;
-		 0 0 0 0 0 1 0 0 0;
+Q = [0.0000002 0 0 0 0 0 0 0 0;
+		 0 0.005 0 0 0 0 0 0 0;
+		 0 0 0.005 0 0 0 0 0 0;
+		 0 0 0 0.0000005 0 0 0 0 0;
+		 0 0 0 0 0.1 0 0 0 0;
+		 0 0 0 0 0 0.1 0 0 0;
 		 0 0 0 0 0 0 1 0 0;
 		 0 0 0 0 0 0 0 1 0;
 		 0 0 0 0 0 0 0 0 1];
@@ -70,8 +70,8 @@ disp(K);
 
 sys = ss((A - B*K), B, C ,D);
 x0 = [-1;
-			0.1;
-			0.1;
+			0.02;
+			0.02;
 			0;
 			0;
 			0;

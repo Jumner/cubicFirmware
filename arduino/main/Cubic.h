@@ -20,7 +20,7 @@ public:
 	BLA::Matrix<9, 3> getB();
 	void calculateX(float t[3], VectorInt16 td, float dt);
 	void signY(BLA::Matrix<9> aPriori);
-	void run();
+	void run(float t[3], VectorInt16 td, float dt);
 	void printState();
 
 	Cubic();

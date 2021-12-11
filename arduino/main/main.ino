@@ -40,7 +40,7 @@ void setup()
 	Wire.setWireTimeout(3000, true); //timeout value in uSec (fixes hang issue)
 	Serial.begin(38400);
 	delay(1000);
-
+	Serial.println("starting");
 	imu.initialize();
 
 	pinMode(2, INPUT); // 6050
@@ -85,16 +85,13 @@ void loop()
 	// safe("not gonna do stuff");
 	if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
 	{
+		Serial.println("n");
 		imu.dmpGetQuaternion(&q, fifoBuffer);
-		imu.dmpGetEuler(euler, &q);				 // Get euler angles
-		imu.dmpGetGyro(&gyro, fifoBuffer); // Get gyro
-		// Kalman filter stuff
+		imu.dmpGetEuler(euler, &q);									 // Get euler angles
+		imu.dmpGetGyro(&gyro, fifoBuffer);					 // Get gyro
 		double dt = (micros() - time) / (1000000.0); // In secs
 		time = micros();
-
-		// cube.calculateX(euler, gyro, dt); // Kaaaaaaal?
-		cube.measureY(euler, gyro);
-		// cube.run(); // "It just works"
+		cube.run(euler, gyro, dt); // "It just works"
 		cube.printState();
 	}
 }

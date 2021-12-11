@@ -100,8 +100,10 @@ BLA::Matrix<9, 3> Cubic::getB()
 					0, 0, w};
 }
 
-void Cubic::run()
+void Cubic::run(float t[3], VectorInt16 td, float dt)
 {
+
+	calculateX(t, td, dt); // Kaaaaaaal?
 	BLA::Matrix<3> U = getU();
 	// motors[0].setTorque(U(0));
 	// motors[1].setTorque(U(1));
@@ -113,4 +115,21 @@ void Cubic::printState()
 {
 	Serial.print("Estimated State: ");
 	Serial << X << '\n';
+	// Serial.print(Y(0));
+	// Serial.print(',');
+	// Serial.print(Y(1));
+	// Serial.print(',');
+	// Serial.print(Y(2));
+	// Serial.print(',');
+	// Serial.print(Y(3));
+	// Serial.print(',');
+	// Serial.print(Y(4));
+	// Serial.print(',');
+	// Serial.print(Y(5));
+	// Serial.print(',');
+	// Serial.print(Y(6));
+	// Serial.print(',');
+	// Serial.print(Y(7));
+	// Serial.print(',');
+	// Serial.println(Y(8));
 }

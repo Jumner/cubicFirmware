@@ -1,5 +1,4 @@
 #include "Motor.h"
-#include "Kalman.h"
 #include <MPU6050_6Axis_MotionApps20.h>
 #include <BasicLinearAlgebra.h>
 using namespace BLA;
@@ -8,7 +7,6 @@ using namespace BLA;
 class Cubic // 462 bytes
 {
 public:
-	Kalman kalman;																		// 324 bytes
 	BLA::Matrix<9> X;																	// 36 bytes
 	BLA::Matrix<9> Y;																	// 36 bytes
 	BLA::Matrix<3> U;																	// 12 bytes

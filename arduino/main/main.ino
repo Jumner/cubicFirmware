@@ -85,7 +85,6 @@ void loop()
 	// safe("not gonna do stuff");
 	if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
 	{
-		Serial.println("n");
 		imu.dmpGetQuaternion(&q, fifoBuffer);
 		imu.dmpGetEuler(euler, &q);									 // Get euler angles
 		imu.dmpGetGyro(&gyro, fifoBuffer);					 // Get gyro

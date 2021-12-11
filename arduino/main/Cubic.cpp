@@ -30,7 +30,7 @@ void Cubic::calculateX(float t[3], VectorInt16 td, float dt)
 	// Note that this is the same as C * aPriori bc we using full state feedback
 	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 	signY(aPriori);
-	X = kalman.getPosterior(aPriori, Y, getA()); // Kalman
+	X = Y;
 }
 
 void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we must add a sign

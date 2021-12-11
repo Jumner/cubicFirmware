@@ -3,7 +3,7 @@
 #include <BasicLinearAlgebra.h>
 
 // Values
-#define s -0.00001			 // Small neg value
+#define s -0.001				 // Small neg value
 #define mass 1.199			 // Mass (kg)
 #define l 0.119511505722 // Length of pendulum arm (m)
 #define ix 0.004281			 // Inertia x
@@ -30,11 +30,15 @@ void Cubic::calculateX(float t[3], VectorInt16 td, float dt)
 	// Note that this is the same as C * aPriori bc we using full state feedback
 	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 	signY(aPriori);
-	X = Y;
+	X = Y; // Sadge
 }
 
 void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we must add a sign
 {
+	if (aPriori(6) < 0)
+	{
+		Y(6) *= -1;
+	}
 	if (aPriori(7) < 0)
 	{
 		Y(7) *= -1;
@@ -43,16 +47,15 @@ void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we
 	{
 		Y(8) *= -1;
 	}
-	if (aPriori(9) < 0)
-	{
-		Y(9) *= -1;
-	}
 }
 BLA::Matrix<3, 9> Cubic::getK()
 { // This was precomputed with octave (open sauce matlab)
-	return {-0.57735, -1144.7, 1.1682e-08, -9.8869, -142.66, 1.46e-09, -0.66664, 0.33336, 0.33336,
-					-0.57735, 572.37, -992.73, -9.8869, 71.328, -123.88, 0.33336, -0.66664, 0.33336,
-					-0.57735, 572.37, 992.73, -9.8869, 71.328, 123.88, 0.33336, 0.33336, -0.66664};
+	return {-5.0687e-09, -2.3067, 5.2955e-10, -2.7098e-05, -0.28745, 6.6063e-11, -4.1373e-06, 5.613e-06, 5.613e-06,
+					-5.0688e-09, 1.1533, -1.9976, -2.7098e-05, 0.14373, -0.24928, 5.613e-06, -4.1373e-06, 5.613e-06,
+					-5.0679e-09, 1.1533, 1.9976, -2.7098e-05, 0.14373, 0.24928, 5.613e-06, 5.613e-06, -4.1373e-06};
+	// return {-0.57735, -1144.7, 1.1682e-08, -9.8869, -142.66, 1.46e-09, -0.66664, 0.33336, 0.33336,
+	// 				-0.57735, 572.37, -992.73, -9.8869, 71.328, -123.88, 0.33336, -0.66664, 0.33336,
+	// 				-0.57735, 572.37, 992.73, -9.8869, 71.328, 123.88, 0.33336, 0.33336, -0.66664};
 }
 
 void Cubic::measureY(float t[3], VectorInt16 td)
@@ -105,9 +108,10 @@ void Cubic::run(float t[3], VectorInt16 td, float dt)
 
 	calculateX(t, td, dt); // Kaaaaaaal?
 	BLA::Matrix<3> U = getU();
-	// motors[0].setTorque(U(0));
-	// motors[1].setTorque(U(1));
-	// motors[2].setTorque(U(2));
+	// motors[0].setTorque(U(0), Y(7));
+	motors[0].setTorque(U(0), X(6));
+	motors[1].setTorque(U(1), X(7));
+	motors[2].setTorque(U(2), X(8));
 	// 🙏
 }
 

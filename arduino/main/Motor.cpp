@@ -30,24 +30,33 @@ void Motor::interrupt(void)
 	}
 }
 
-void Motor::setPwm(int val)
+void Motor::setPwm(int val, bool dir)
 {
+	if (dir)
+	{
+		digitalWrite(cw, LOW);
+	}
+	else
+	{
+		digitalWrite(cw, HIGH);
+	}
 	analogWrite(pwm, val);
 }
 
-void Motor::setTorque(double t)
+void Motor::setTorque(double t, double vel)
 {
-	if (t == 0.00)
+	if (t < 0)
 	{
-		setPwm(255);
-		return;
+		vel *= -1;
 	}
-	double decimalVal = abs(t / (0.0625 - 0.000743 * rps - 0.00000348 * rps * rps + 0.0000000429 * rps * rps * rps));
+	double decimalVal = abs(t / (0.0625 - 0.000743 * vel - 0.00000348 * vel * vel + 0.0000000429 * vel * vel * vel));
 	int val = 245 - 245 * max(min(decimalVal, 1), 0);
-	setPwm(val);
+	setPwm(val, t > 0);
+	Serial.print(t);
+	Serial.print(", ");
 	Serial.print(val);
 	Serial.print(", ");
-	Serial.println(rps);
+	Serial.println(vel);
 }
 // t = ((245-val)/245) * (0.0625 - 0.0007.43*rps - 0.00000348*rps*rps + 0.0000000429*rps*rps*rps)
 // 245 - 245 * t / (0.0625 - 0.0007.43*rps - 0.00000348*rps*rps + 0.0000000429*rps*rps*rps) = val

@@ -1,6 +1,11 @@
+pkg load control
 close all
+
+function u = getU(K, x)
+	u = - K * x;
+end
 % Values
-s = -0.00001; % Small neg value
+s = -0.001; % Small neg value
 mass = 1.199;	      % Mass in kg
 l = 0.119511505722;			 % Length of pendulum arm
 ix = 0.004281;			 % Inertia x
@@ -45,10 +50,10 @@ C = eye(9);
 D = zeros(9,3);
 
 % Q
-Q = [1 0 0 0 0 0 0 0 0;
-		 0 1 0 0 0 0 0 0 0;
-		 0 0 1 0 0 0 0 0 0;
-		 0 0 0 1 0 0 0 0 0;
+Q = [0.00002 0 0 0 0 0 0 0 0;
+		 0 0.05 0 0 0 0 0 0 0;
+		 0 0 0.05 0 0 0 0 0 0;
+		 0 0 0 0.00005 0 0 0 0 0;
 		 0 0 0 0 1 0 0 0 0;
 		 0 0 0 0 0 1 0 0 0;
 		 0 0 0 0 0 0 1 0 0;
@@ -56,22 +61,32 @@ Q = [1 0 0 0 0 0 0 0 0;
 		 0 0 0 0 0 0 0 0 1];
 
 % R
-R = [1 0 0;
-		 0 1 0;
-		 0 0 1];
+R = [10000000000 0 0;
+		 0 10000000000 0;
+		 0 0 10000000000];
 
 K = lqr(A,B,Q,R);
 disp(K);
 
 sys = ss((A - B*K), B, C ,D);
-x0 = [0;
-			1;
-			1;
+x0 = [-1;
+			0.1;
+			0.1;
 			0;
 			0;
 			0;
 			0;
 			0;
 			0];
-t= 0:0.005:30;
+t= 0:0.005:1.5;
 [y,t,x] = initial(sys, x0, t);
+% u = -x*K
+
+% Graph
+
+for i = 1:length(t)
+	u(i,:) = getU(K, x(i,:)');
+end
+
+graphLQR = helper('GetGraph'); % Grab graph function
+graphLQR(x, t, u); % Graph data

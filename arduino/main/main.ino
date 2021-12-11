@@ -91,6 +91,9 @@ void loop()
 		double dt = (micros() - time) / (1000000.0); // In secs
 		time = micros();
 		cube.run(euler, gyro, dt); // "It just works"
+		// cube.motors[0].setPwm(0, true);
+		// cube.motors[1].setPwm(0, true);
+		// cube.motors[2].setPwm(0, true);
 		cube.printState();
 	}
 }

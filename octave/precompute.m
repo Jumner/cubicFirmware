@@ -10,15 +10,16 @@ l = 0.119511505722;			 % Length of pendulum arm
 ix = 0.004281;			 % Inertia x
 iy = 0.02183;			 % Inertia y
 iz = 0.02189;			 % Inertia z
-iw = 0.0002504;		 % Wheen inertia
+iw = 0.0002504;		 % Wheel inertia
 
 % A
+x = mass * 9.81 * l / ix; % X Gravity
 y = mass * 9.81 * l / iy; % Y Gravity
 z = mass * 9.81 * l / iz; % Z Gravity
 A = [0 0 0 1 0 0 0 0 0;
 			0 0 0 0 1 0 0 0 0;
 			0 0 0 0 0 1 0 0 0;
-			0 0 0 0 0 0 0 0 0;
+			x 0 0 0 0 0 0 0 0;
 			0 y 0 0 0 0 0 0 0;
 			0 0 z 0 0 0 0 0 0;
 			0 0 0 0 0 0 0 0 0;
@@ -27,17 +28,15 @@ A = [0 0 0 1 0 0 0 0 0;
 
 % B
 w = 1 / iw;							 % Wheel acceleration
-x = -1 / (sqrt(3) * ix); % X Acceleration
-y = -2 / (sqrt(6) * iy); % Y Acceleration
-h = 1 / (sqrt(6) * iy);	 % Half Y Acceleration
-z = 1 / (sqrt(2) * iz); % Z Acceleration
-n = -1 / (sqrt(2) * iz);	 % Negative Z Acceleration (its acc positive)
+x = -1 / ix;
+y = -1 / iy;
+z = -1 / iz;
 B = [0 0 0;
 		 0 0 0;
 		 0 0 0;
-		 x x x;
-		 y h h;
-		 0 z n;
+		 x 0 0;
+		 0 y 0;
+		 0 0 z;
 		 w 0 0;
 		 0 w 0;
 		 0 0 w];
@@ -49,28 +48,28 @@ C = eye(9);
 D = zeros(9,3);
 
 % Q
-Q = [0.0000002 0 0 0 0 0 0 0 0;
-		 0 0.005 0 0 0 0 0 0 0;
-		 0 0 0.005 0 0 0 0 0 0;
-		 0 0 0 0.0000005 0 0 0 0 0;
-		 0 0 0 0 0.1 0 0 0 0;
-		 0 0 0 0 0 0.1 0 0 0;
+Q = [1 0 0 0 0 0 0 0 0;
+		 0 1 0 0 0 0 0 0 0;
+		 0 0 1 0 0 0 0 0 0;
+		 0 0 0 0.5 0 0 0 0 0;
+		 0 0 0 0 0.5 0 0 0 0;
+		 0 0 0 0 0 0.5 0 0 0;
 		 0 0 0 0 0 0 1 0 0;
 		 0 0 0 0 0 0 0 1 0;
 		 0 0 0 0 0 0 0 0 1];
 
 % R
-R = [1000000 0 0;
-		 0 1000000 0;
-		 0 0 1000000];
+R = [10 0 0;
+		 0 10 0;
+		 0 0 10];
 
 K = lqr(A,B,Q,R);
 disp(K);
 
 sys = ss((A - B*K), B, C ,D);
-x0 = [-1;
-			0.02;
-			0.02;
+x0 = [0.1;
+			0;
+			0;
 			0;
 			0;
 			0;

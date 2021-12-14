@@ -5,10 +5,10 @@
 // Values
 #define mass 1.199			 // Mass (kg)
 #define l 0.119511505722 // Length of pendulum arm (m)
-#define ix 0.004281			 // Inertia x
-#define iy 0.02183			 // Inertia y
-#define iz 0.02189			 // Inertia z
-#define iw 0.0002504		 // Wheen inertia (kg*m^2)
+#define ix 0.015				 // Inertia x
+#define iy 0.015				 // Inertia y
+#define iz 0.015				 // Inertia z
+#define iw 0.00025			 // Wheen inertia (kg*m^2)
 
 using namespace BLA;
 Cubic::Cubic()
@@ -57,9 +57,9 @@ void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we
 }
 BLA::Matrix<3, 9> Cubic::getK()
 { // This was precomputed with octave (open sauce matlab)
-	return {-7.2292e-08, -2.6568, -3.0579e-10, -0.0033118, -0.33108, -2.0317e-11, -0.00021725, 9.8982e-05, 9.8981e-05,
-					-7.2285e-08, 1.3284, 2.3013, -0.0033174, 0.16554, 0.28717, 9.8791e-05, -0.00021744, 9.8791e-05,
-					-7.2292e-08, 1.3284, -2.3013, -0.0033148, 0.16554, -0.28717, 9.8879e-05, 9.8879e-05, -0.00021735};
+	return {-1.6298, 0, 0, -0.30117, 0, 0, -0.001, 0, 0,
+					0, -1.6298, 0, 0, -0.30117, 0, 0, -0.001, 0,
+					0, 0, -1.6298, 0, 0, -0.30117, 0, 0, -0.001};
 }
 
 void Cubic::measureY(float t[3], VectorInt16 td)
@@ -112,10 +112,10 @@ void Cubic::run(float t[3], VectorInt16 td, float dt)
 	calculateU();
 	// motors[1].setTorque(U(0), Y(7));
 	printState();
-	motors[0].setTorque(U(0), X(6));
-	motors[1].setTorque(U(1), X(7));
-	motors[2].setTorque(U(2), X(8));
-	// 🙏
+	motors[0].setTorque(U(0), X(6)); // X
+	motors[1].setTorque(U(1), X(7)); // Y
+	motors[2].setTorque(U(2), X(8)); // Z
+																	 // 🙏
 }
 
 void Cubic::printState()

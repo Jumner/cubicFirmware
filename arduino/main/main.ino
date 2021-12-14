@@ -55,7 +55,6 @@ void setup()
 
 	if (imu.dmpInitialize() != 0)
 		safe("2");
-
 	imu.setXAccelOffset(-1138);
 	imu.setYAccelOffset(159);
 	imu.setZAccelOffset(3670);
@@ -65,6 +64,7 @@ void setup()
 
 	// imu.CalibrateAccel(6);
 	// imu.CalibrateGyro(6);
+	// imu.PrintActiveOffsets();
 
 	imu.setDMPEnabled(true);
 

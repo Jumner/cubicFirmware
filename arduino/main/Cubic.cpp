@@ -64,7 +64,7 @@ BLA::Matrix<3, 9> Cubic::getK()
 
 void Cubic::measureY(float t[3], VectorInt16 td)
 {
-	Y = {t[0], t[1], t[2], td.x / 7509.87263606, td.y / 7509.87263606, td.z / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps};
+	Y = {t[0], -t[1], -t[2], -td.x / 7509.87263606, td.y / 7509.87263606, td.z / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps};
 }
 
 void Cubic::calculateU()
@@ -120,18 +120,18 @@ void Cubic::run(float t[3], VectorInt16 td, float dt)
 
 void Cubic::printState()
 {
-	Serial << X(0) << ',';
-	Serial << X(1) << ',';
-	Serial << X(2) << ',';
+	// Serial << X(0) << ',';
+	// Serial << X(1) << ',';
+	// Serial << X(2) << ',';
 	Serial << X(3) << ',';
 	Serial << X(4) << ',';
-	Serial << X(5) << ',';
-	Serial << X(6) << ',';
-	Serial << X(7) << ',';
-	Serial << X(8) << ',';
-	Serial << U(0) << ',';
-	Serial << U(1) << ',';
-	Serial << U(2) << '\n';
+	Serial << X(5) << '\n';
+	// Serial << X(6) << ',';
+	// Serial << X(7) << ',';
+	// Serial << X(8) << '\n';
+	// Serial << U(0) << ',';
+	// Serial << U(1) << ',';
+	// Serial << U(2) << '\n';
 	// Serial.print("Estimated State: ");
 	// Serial.print(Y(0));
 	// Serial.print(',');

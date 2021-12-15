@@ -55,12 +55,19 @@ void setup()
 
 	if (imu.dmpInitialize() != 0)
 		safe("2");
-	imu.setXAccelOffset(-412);
-	imu.setYAccelOffset(-675);
-	imu.setZAccelOffset(4652);
+	imu.setXAccelOffset(-676);
+	imu.setYAccelOffset(483);
+	imu.setZAccelOffset(4950);
 	imu.setXGyroOffset(110);
 	imu.setYGyroOffset(15);
 	imu.setZGyroOffset(-29);
+
+	// imu.setXAccelOffset(-412);
+	// imu.setYAccelOffset(-675);
+	// imu.setZAccelOffset(4652);
+	// imu.setXGyroOffset(110);
+	// imu.setYGyroOffset(15);
+	// imu.setZGyroOffset(-29);
 
 	// imu.CalibrateAccel();
 	// imu.CalibrateGyro();
@@ -97,15 +104,15 @@ void loop()
 		// cube.motors[1].setPwm(200, true);
 		// cube.motors[2].setPwm(200, true);
 		// cube.printState();
-		if (cube.motors[0].rps > 75)
+		if (cube.motors[0].rps > 100)
 		{
 			safe("m0");
 		}
-		else if (cube.motors[1].rps > 75)
+		else if (cube.motors[1].rps > 100)
 		{
 			safe("m1");
 		}
-		else if (cube.motors[2].rps > 75)
+		else if (cube.motors[2].rps > 100)
 		{
 			safe("m2");
 		}

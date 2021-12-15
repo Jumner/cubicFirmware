@@ -14,9 +14,9 @@ iw = 0.00025; % Wheel inertia
 
 
 % A
-x = mass * 9.81 * l / (ix * 3); % X Gravity
-y = mass * 9.81 * l / (iy * 3); % Y Gravity
-z = mass * 9.81 * l / (iz * 3); % Z Gravity
+x = mass * 9.81 * l / (ix); % X Gravity
+y = mass * 9.81 * l / (iy); % Y Gravity
+z = mass * 9.81 * l / (iz); % Z Gravity
 A = [0 0 0 1 0 0 0 0 0;
 			0 0 0 0 1 0 0 0 0;
 			0 0 0 0 0 1 0 0 0;

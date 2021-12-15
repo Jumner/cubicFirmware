@@ -50,7 +50,7 @@ void Motor::setTorque(double t, double vel)
 		vel *= -1;
 	}
 	double decimalVal = abs(t / (0.0625 - 0.000743 * vel - 0.00000348 * vel * vel + 0.0000000429 * vel * vel * vel));
-	int val = 245 - 245 * max(min(decimalVal, 0.3), 0);
+	int val = 245 - 245 * max(min(decimalVal, 0.5), 0);
 	setPwm(val, t > 0);
 	// Serial.print(t);
 	// Serial.print(", ");

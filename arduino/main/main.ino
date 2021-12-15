@@ -55,16 +55,17 @@ void setup()
 
 	if (imu.dmpInitialize() != 0)
 		safe("2");
-	imu.setXAccelOffset(-1138);
-	imu.setYAccelOffset(159);
-	imu.setZAccelOffset(3670);
-	imu.setXGyroOffset(116);
-	imu.setYGyroOffset(20);
-	imu.setZGyroOffset(15);
+	imu.setXAccelOffset(-412);
+	imu.setYAccelOffset(-675);
+	imu.setZAccelOffset(4652);
+	imu.setXGyroOffset(110);
+	imu.setYGyroOffset(15);
+	imu.setZGyroOffset(-29);
 
-	// imu.CalibrateAccel(6);
-	// imu.CalibrateGyro(6);
+	// imu.CalibrateAccel();
+	// imu.CalibrateGyro();
 	// imu.PrintActiveOffsets();
+	// safe("done calibrate");
 
 	imu.setDMPEnabled(true);
 
@@ -77,6 +78,7 @@ void setup()
 	mpuIntStatus = imu.getIntStatus();
 
 	packetSize = imu.dmpGetFIFOPacketSize();
+	Serial.println("done");
 	delay(1000);
 }
 unsigned long time = micros();

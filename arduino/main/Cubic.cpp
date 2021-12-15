@@ -74,9 +74,9 @@ void Cubic::calculateU()
 
 BLA::Matrix<9, 9> Cubic::getA()
 {
-	float x = mass * 9.81 * l / ix; // X Gravity
-	float y = mass * 9.81 * l / iy; // Y Gravity
-	float z = mass * 9.81 * l / iz; // Z Gravity
+	float x = mass * 9.81 * l / (ix * 3); // X Gravity
+	float y = mass * 9.81 * l / (iy * 3); // Y Gravity
+	float z = mass * 9.81 * l / (iz * 3); // Z Gravity
 	return {0, 0, 0, 1, 0, 0, 0, 0, 0,
 					0, 0, 0, 0, 1, 0, 0, 0, 0,
 					0, 0, 0, 0, 0, 1, 0, 0, 0,

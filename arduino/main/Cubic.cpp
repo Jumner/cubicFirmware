@@ -31,7 +31,7 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	// Serial.println(t);
 
 	t[0] = atan(ap.z / ap.y) - atan(1);
-	t[1] = atan(ap.x / ap.z) - atan(1);
+	t[1] = atan(ap.x / ap.z) - atan(1) - 0.028;
 	t[2] = atan(ap.y / ap.x) - atan(1);
 
 	// Calculate A priori (the predicted state based on model)
@@ -39,7 +39,7 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 
 	// State estimation
-	float prioriGain = 0.80f; // turn up to prioritize prediction
+	float prioriGain = 0.70f; // turn up to prioritize prediction
 	float yGain = 1.0 - prioriGain;
 	t[0] *= yGain;
 	t[0] += aPriori(0) * prioriGain;
@@ -87,9 +87,9 @@ BLA::Matrix<3, 9> Cubic::getK()
 	// return {-3, 0, 0, -1, 0, 0, 0.01, 0, 0,
 	// 				0, -3, 0, 0, -1, 0, 0, 0.01, 0,
 	// 				0, 0, -3, 0, 0, -1, 0, 0, 0.01};
-	return {-2.5, 0, 0, -0, 0, 0, 0.01, 0, 0,
-					0, -2, 0, 0, -6, 0, 0, 0.001, 0,
-					0, 0, -1, 0, 0, -0, 0, 0, 0.01};
+	return {-2.5 * X(0) /* Wait, thats illegal */, 0, 0, -0, 0, 0, 0.01, 0, 0,
+					0, -0.5, 0, 0, -4, 0, 0, 0, 0.001, // 2, 6, 0.001 works kinda
+					0, 0, -1 * X(2), 0, 0, -0, 0, 0, 0.01};
 }
 
 void Cubic::measureY(float t[3], VectorInt16 td)

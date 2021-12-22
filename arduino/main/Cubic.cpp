@@ -21,9 +21,20 @@ Cubic::~Cubic()
 {
 }
 
-void Cubic::calculateX(float t[3], VectorInt16 td, float dt)
+void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 {
-	measureY(t, td); // Measure the output/state (full state feedback)
+	float t[3]; // theta
+	VectorFloat ap;
+	ap.x = a.x / 1670.03;
+	ap.y = a.y / 1670.03;
+	ap.z = -a.z / 1670.03;
+	// Serial.println(t);
+
+	t[0] = atan(ap.z / ap.y) - atan(1);
+	t[1] = atan(ap.x / ap.z) - atan(1);
+	t[2] = atan(ap.y / ap.x) - atan(1);
+
+	measureY(t, td); // Measure the output/state (full state feedback (kinda?))
 
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
@@ -63,14 +74,17 @@ BLA::Matrix<3, 9> Cubic::getK()
 	// return {-5, 0, 0, 0.5, 0, 0, 0.007, 0, 0,
 	// 				0, -5, 0, 0, 0.5, 0, 0, 0.007, 0,
 	// 				0, 0, -5, 0, 0, 0.5, 0, 0, 0.007};
-	return {-20, 0, 0, -5, 0, 0, 0.1, 0, 0,
-					0, -20, 0, 0, -5, 0, 0, 0.1, 0,
-					0, 0, -20, 0, 0, -5, 0, 0, 0.1};
+	// return {-3, 0, 0, -1, 0, 0, 0.01, 0, 0,
+	// 				0, -3, 0, 0, -1, 0, 0, 0.01, 0,
+	// 				0, 0, -3, 0, 0, -1, 0, 0, 0.01};
+	return {-1, 0, 0, -0, 0, 0, 0.01, 0, 0,
+					0, -1, 0, 0, -0, 0, 0, 0.01, 0,
+					0, 0, -1, 0, 0, -0, 0, 0, 0.01};
 }
 
 void Cubic::measureY(float t[3], VectorInt16 td)
 {
-	Y = {t[0], -t[1], -t[2], -td.z / 7509.87263606, td.y / 7509.87263606, td.x / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps};
+	Y = {t[0], t[1], t[2], -td.z / 7509.87263606, td.y / 7509.87263606, td.x / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps};
 }
 
 void Cubic::calculateU()
@@ -111,17 +125,17 @@ BLA::Matrix<9, 3> Cubic::getB()
 					0, 0, w};
 }
 
-void Cubic::run(float t[3], VectorInt16 td, float dt)
+void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 {
 
-	calculateX(t, td, dt); // Kaaaaaaal?
+	calculateX(a, td, dt); // Kaaaaaaal?
 	calculateU();
 	// motors[1].setTorque(U(0), Y(7));
 	printState();
 	// motors[0].setTorque(U(0), X(6)); // X
-	motors[1].setTorque(U(1), X(7)); // Y
-																	 // motors[2].setTorque(U(2), X(8)); // Z
-																	 // 🙏
+	// motors[1].setTorque(U(1), X(7)); // Y
+	// motors[2].setTorque(U(2), X(8)); // Z
+	// 🙏
 }
 
 void Cubic::printState()
@@ -130,6 +144,14 @@ void Cubic::printState()
 	Serial << X(4) << ',';
 	Serial << X(7) << ',';
 	Serial << U(1) << '\n';
+	// Serial << X(0) << ',';
+	// Serial << X(3) << ',';
+	// Serial << X(6) << ',';
+	// Serial << U(0) << '\n';
+	// Serial << X(2) << ',';
+	// Serial << X(5) << ',';
+	// Serial << X(8) << ',';
+	// Serial << U(2) << '\n';
 	// Serial << X(0) << ',';
 	// Serial << X(1) << ',';
 	// Serial << X(2) << ',';

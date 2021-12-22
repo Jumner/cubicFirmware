@@ -24,9 +24,10 @@ uint16_t packetSize;		// expected DMP packet size (default is 42 bytes)
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 
 // orientation/motion vars
-Quaternion q;			// [w, x, y, z]         quaternion container
-VectorInt16 gyro; // [x, y, z]
-float euler[3];		// [psi, theta, phi]    Euler angle container
+Quaternion q;			 // [w, x, y, z]         quaternion container
+VectorInt16 gyro;	 // [x, y, z]
+VectorInt16 accel; // [x, y, z]
+float euler[3];		 // [psi, theta, phi]    Euler angle container
 
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
 void dmpDataReady()
@@ -56,9 +57,9 @@ void setup()
 
 	if (imu.dmpInitialize() != 0)
 		safe("2");
-	imu.setXAccelOffset(-648);
-	imu.setYAccelOffset(483);
-	imu.setZAccelOffset(4982);
+	// imu.setXAccelOffset(-648);
+	// imu.setYAccelOffset(483);
+	// imu.setZAccelOffset(4982);
 	imu.setXGyroOffset(110);
 	imu.setYGyroOffset(15);
 	imu.setZGyroOffset(-29);
@@ -95,13 +96,16 @@ void loop()
 	// safe("not gonna do stuff");
 	if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
 	{
-		imu.dmpGetQuaternion(&q, fifoBuffer);
-		imu.dmpGetEuler(euler, &q); // Get euler angles
+		// imu.dmpGetQuaternion(&q, fifoBuffer);
+		// imu.dmpGetEuler(euler, &q); // Get euler angles
 		// imu.dmpGetGyro(&gyro, fifoBuffer);													// Get gyro
+		imu.getAcceleration(&accel.x, &accel.y, &accel.z);
 		imu.getRotation(&gyro.x, &gyro.y, &gyro.z);
 		double dt = (micros() - time) / (1000000.0); // In secs
 		time = micros();
-		cube.run(euler, gyro, dt); // "It just works"
+		cube.run(accel, gyro, dt); // "It just works"
+		// Serial << accel.x << ', ' << accel.y << ', ' << accel.z << '\n';
+		// Serial.println();
 		// cube.motors[0].setPwm(200, true);
 		// cube.motors[1].setPwm(200, true);
 		// cube.motors[2].setPwm(200, true);

@@ -16,9 +16,9 @@ public:
 	void calculateU();
 	BLA::Matrix<9, 9> getA();
 	BLA::Matrix<9, 3> getB();
-	void calculateX(float t[3], VectorInt16 td, float dt);
+	void calculateX(VectorInt16 a, VectorInt16 td, float dt);
 	void signY(BLA::Matrix<9> aPriori);
-	void run(float t[3], VectorInt16 td, float dt);
+	void run(VectorInt16 a, VectorInt16 td, float dt);
 	void printState();
 
 	Cubic();

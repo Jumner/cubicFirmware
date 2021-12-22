@@ -52,12 +52,13 @@ void setup()
 		safe("1");
 
 	imu.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
+	imu.setFullScaleAccelRange(MPU6050_ACCEL_FS_2);
 
 	if (imu.dmpInitialize() != 0)
 		safe("2");
-	imu.setXAccelOffset(-676);
+	imu.setXAccelOffset(-648);
 	imu.setYAccelOffset(483);
-	imu.setZAccelOffset(4950);
+	imu.setZAccelOffset(4982);
 	imu.setXGyroOffset(110);
 	imu.setYGyroOffset(15);
 	imu.setZGyroOffset(-29);
@@ -95,8 +96,9 @@ void loop()
 	if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
 	{
 		imu.dmpGetQuaternion(&q, fifoBuffer);
-		imu.dmpGetEuler(euler, &q);									 // Get euler angles
-		imu.dmpGetGyro(&gyro, fifoBuffer);					 // Get gyro
+		imu.dmpGetEuler(euler, &q); // Get euler angles
+		// imu.dmpGetGyro(&gyro, fifoBuffer);													// Get gyro
+		imu.getRotation(&gyro.x, &gyro.y, &gyro.z);
 		double dt = (micros() - time) / (1000000.0); // In secs
 		time = micros();
 		cube.run(euler, gyro, dt); // "It just works"

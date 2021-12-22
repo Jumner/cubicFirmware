@@ -42,29 +42,35 @@ void Cubic::calculateX(float t[3], VectorInt16 td, float dt)
 
 void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we must add a sign
 {
-	if (aPriori(6) < 0)
+	if ((motors[0].rps - motors[0].oldrps) * U(0) < 0 && motors[0].rps < 100)
 	{
 		Y(6) = -Y(6);
 	}
-	if (aPriori(7) < 0)
+	if ((motors[1].rps - motors[1].oldrps) * U(1) < 0 && motors[1].rps < 100)
 	{
 		Y(7) = -Y(7);
 	}
-	if (aPriori(8) < 0)
+	if ((motors[2].rps - motors[2].oldrps) * U(2) < 0 && motors[2].rps < 100)
 	{
 		Y(8) = -Y(8);
 	}
 }
 BLA::Matrix<3, 9> Cubic::getK()
 { // This was precomputed with octave (open sauce matlab)
-	return {-3.1908, 0, 0, -0.34042, 0, 0, -0.00031623, 0, 0,
-					0, -3.1908, 0, 0, -0.34042, 0, 0, -0.00031623, 0,
-					0, 0, -3.1908, 0, 0, -0.34042, 0, 0, -0.00031623};
+	// return {-3.1908, 0, 0, -0.34042, 0, 0, -0.00031623, 0, 0,
+	// 				0, -3.1908, 0, 0, -0.34042, 0, 0, -0.00031623, 0,
+	// 				0, 0, -3.1908, 0, 0, -0.34042, 0, 0, -0.00031623};
+	// return {-5, 0, 0, 0.5, 0, 0, 0.007, 0, 0,
+	// 				0, -5, 0, 0, 0.5, 0, 0, 0.007, 0,
+	// 				0, 0, -5, 0, 0, 0.5, 0, 0, 0.007};
+	return {-20, 0, 0, -5, 0, 0, 0.1, 0, 0,
+					0, -20, 0, 0, -5, 0, 0, 0.1, 0,
+					0, 0, -20, 0, 0, -5, 0, 0, 0.1};
 }
 
 void Cubic::measureY(float t[3], VectorInt16 td)
 {
-	Y = {t[0], -t[1], -t[2], -td.x / 7509.87263606, td.y / 7509.87263606, td.z / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps};
+	Y = {t[0], -t[1], -t[2], -td.z / 7509.87263606, td.y / 7509.87263606, td.x / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps};
 }
 
 void Cubic::calculateU()
@@ -120,18 +126,22 @@ void Cubic::run(float t[3], VectorInt16 td, float dt)
 
 void Cubic::printState()
 {
-	Serial << X(0) << ',';
 	Serial << X(1) << ',';
-	Serial << X(2) << ',';
+	Serial << X(4) << ',';
+	Serial << X(7) << ',';
+	Serial << U(1) << '\n';
+	// Serial << X(0) << ',';
+	// Serial << X(1) << ',';
+	// Serial << X(2) << ',';
 	// Serial << X(3) << ',';
 	// Serial << X(4) << ',';
-	// Serial << X(5) << '\n';
+	// Serial << X(5) << ',';
 	// Serial << X(6) << ',';
 	// Serial << X(7) << ',';
-	// Serial << X(8) << '\n';
-	Serial << U(0) << ',';
-	Serial << U(1) << ',';
-	Serial << U(2) << '\n';
+	// Serial << X(8) << ',';
+	// Serial << U(0) << ',';
+	// Serial << U(1) << ',';
+	// Serial << U(2) << '\n';
 	// Serial.print("Estimated State: ");
 	// Serial.print(Y(0));
 	// Serial.print(',');

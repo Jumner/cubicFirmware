@@ -99,7 +99,9 @@ void Cubic::measureY(float t[3], VectorInt16 td)
 
 void Cubic::calculateU()
 {
-	U = -getK() * X;
+	float oldGain = 0.25f;
+	float newGain = 1.0f - oldGain;
+	U = -getK() * X * newGain + U * oldGain;
 }
 
 BLA::Matrix<9, 9> Cubic::getA()

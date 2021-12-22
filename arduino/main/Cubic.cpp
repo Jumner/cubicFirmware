@@ -8,7 +8,7 @@
 #define ix 0.015				 // Inertia x
 #define iy 0.015				 // Inertia y
 #define iz 0.015				 // Inertia z
-#define iw 0.00025			 // Wheen inertia (kg*m^2)
+#define iw 0.00025			 // Wheel inertia (kg*m^2)
 
 using namespace BLA;
 Cubic::Cubic()
@@ -36,10 +36,10 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
-	BLA::Matrix<9> aPriori = X + (getB() * U) * dt;
+	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 
 	// State estimation
-	float prioriGain = 0.5f; // turn up to prioritize prediction
+	float prioriGain = 0.80f; // turn up to prioritize prediction
 	float yGain = 1.0 - prioriGain;
 	t[0] *= yGain;
 	t[0] += aPriori(0) * prioriGain;
@@ -87,8 +87,8 @@ BLA::Matrix<3, 9> Cubic::getK()
 	// return {-3, 0, 0, -1, 0, 0, 0.01, 0, 0,
 	// 				0, -3, 0, 0, -1, 0, 0, 0.01, 0,
 	// 				0, 0, -3, 0, 0, -1, 0, 0, 0.01};
-	return {-1, 0, 0, -0, 0, 0, 0.01, 0, 0,
-					0, -1, 0, 0, -0, 0, 0, 0.01, 0,
+	return {-2.5, 0, 0, -0, 0, 0, 0.01, 0, 0,
+					0, -2, 0, 0, -6, 0, 0, 0.001, 0,
 					0, 0, -1, 0, 0, -0, 0, 0, 0.01};
 }
 

@@ -34,11 +34,21 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	t[1] = atan(ap.x / ap.z) - atan(1);
 	t[2] = atan(ap.y / ap.x) - atan(1);
 
-	measureY(t, td); // Measure the output/state (full state feedback (kinda?))
-
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
 	BLA::Matrix<9> aPriori = X + (getB() * U) * dt;
+
+	// State estimation
+	float prioriGain = 0.5f; // turn up to prioritize prediction
+	float yGain = 1.0 - prioriGain;
+	t[0] *= yGain;
+	t[0] += aPriori(0) * prioriGain;
+	t[1] *= yGain;
+	t[1] += aPriori(1) * prioriGain;
+	t[2] *= yGain;
+	t[2] += aPriori(2) * prioriGain;
+
+	measureY(t, td); // Measure the output/state (full state feedback (kinda?))
 	// BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 	signY(aPriori);
 	// Serial.print("Estimated State: ");
@@ -133,9 +143,9 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 	// motors[1].setTorque(U(0), Y(7));
 	printState();
 	// motors[0].setTorque(U(0), X(6)); // X
-	// motors[1].setTorque(U(1), X(7)); // Y
-	// motors[2].setTorque(U(2), X(8)); // Z
-	// 🙏
+	motors[1].setTorque(U(1), X(7)); // Y
+																	 // motors[2].setTorque(U(2), X(8)); // Z
+																	 // 🙏
 }
 
 void Cubic::printState()

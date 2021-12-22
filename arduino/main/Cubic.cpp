@@ -87,9 +87,9 @@ BLA::Matrix<3, 9> Cubic::getK()
 	// return {-3, 0, 0, -1, 0, 0, 0.01, 0, 0,
 	// 				0, -3, 0, 0, -1, 0, 0, 0.01, 0,
 	// 				0, 0, -3, 0, 0, -1, 0, 0, 0.01};
-	return {-2.5 * X(0) /* Wait, thats illegal */, 0, 0, -0, 0, 0, 0.01, 0, 0,
-					0, -0.5, 0, 0, -4, 0, 0, 0, 0.001, // 2, 6, 0.001 works kinda
-					0, 0, -1 * X(2), 0, 0, -0, 0, 0, 0.01};
+	return {-0.5, 0, 0, -4, 0, 0, 0.001, 0, 0,
+					0, -0.5, 0, 0, -4, 0, 0, 0.001, 0, // 2, 6, 0.001 works kinda
+					0, 0, -0.5, 0, 0, -4, 0, 0, 0.001};
 }
 
 void Cubic::measureY(float t[3], VectorInt16 td)
@@ -144,8 +144,8 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 	calculateU();
 	// motors[1].setTorque(U(0), Y(7));
 	printState();
-	// motors[0].setTorque(U(0), X(6)); // X
-	motors[1].setTorque(U(1), X(7)); // Y
+	motors[0].setTorque(U(0), X(6)); // X
+																	 // motors[1].setTorque(U(1), X(7)); // Y
 																	 // motors[2].setTorque(U(2), X(8)); // Z
 																	 // 🙏
 }

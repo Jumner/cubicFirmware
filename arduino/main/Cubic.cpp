@@ -39,7 +39,7 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 
 	// State estimation
-	float prioriGain = 0.70f; // turn up to prioritize prediction
+	float prioriGain = 0.50f; // turn up to prioritize prediction
 	float yGain = 1.0 - prioriGain;
 	t[0] *= yGain;
 	t[0] += aPriori(0) * prioriGain;
@@ -99,7 +99,7 @@ void Cubic::measureY(float t[3], VectorInt16 td)
 
 void Cubic::calculateU()
 {
-	float oldGain = 0.25f;
+	float oldGain = 0.1f;
 	float newGain = 1.0f - oldGain;
 	U = -getK() * X * newGain + U * oldGain;
 }

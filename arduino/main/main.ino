@@ -60,9 +60,9 @@ void setup()
 	// imu.setXAccelOffset(-648);
 	// imu.setYAccelOffset(483);
 	// imu.setZAccelOffset(4982);
-	imu.setXGyroOffset(110);
-	imu.setYGyroOffset(15);
-	imu.setZGyroOffset(-29);
+	imu.setXGyroOffset(114);
+	imu.setYGyroOffset(17);
+	imu.setZGyroOffset(-6);
 
 	// imu.setXAccelOffset(-412);
 	// imu.setYAccelOffset(-675);
@@ -79,10 +79,10 @@ void setup()
 	imu.setDMPEnabled(true);
 
 	// Attach tachometer interrupts
-	attachInterrupt(digitalPinToInterrupt(2), dmpDataReady, RISING); // 6050
-	attachPCINT(digitalPinToPCINT(8), int2, RISING);								 // Pin 2 is mpu interrupt
-	attachPCINT(digitalPinToPCINT(3), int1, RISING);
-	attachPCINT(digitalPinToPCINT(4), int0, RISING);
+	attachInterrupt(digitalPinToInterrupt(2), dmpDataReady, RISING);	 // 6050
+	attachPCINT(digitalPinToPCINT(cube.motors[0].tach), int2, RISING); // Pin 2 is mpu interrupt
+	attachPCINT(digitalPinToPCINT(cube.motors[1].tach), int1, RISING);
+	attachPCINT(digitalPinToPCINT(cube.motors[2].tach), int0, RISING);
 
 	mpuIntStatus = imu.getIntStatus();
 

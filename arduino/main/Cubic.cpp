@@ -30,9 +30,9 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	ap.z = -a.z / 1670.03;
 	// Serial.println(t);
 
-	t[0] = atan(ap.z / ap.y) - atan(1) - 0.052;
+	t[0] = atan(ap.z / ap.y) - atan(1) + 0.01;
 	t[1] = atan(ap.x / ap.z) - atan(1) - 0.028;
-	t[2] = atan(ap.y / ap.x) - atan(1);
+	t[2] = atan(ap.y / ap.x) - atan(1) - 0.01;
 
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
@@ -144,26 +144,26 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 	calculateU();
 	// motors[1].setTorque(U(0), Y(7));
 	printState();
-	motors[0].setTorque(U(0), X(6)); // X
-																	 // motors[1].setTorque(U(1), X(7)); // Y
-																	 // motors[2].setTorque(U(2), X(8)); // Z
+	// motors[0].setTorque(U(0), X(6)); // X
+	// motors[1].setTorque(U(1), X(7)); // Y
+	motors[2].setTorque(U(2), X(8)); // Z
 																	 // 🙏
 }
 
 void Cubic::printState()
 {
-	Serial << X(0) << ',';
-	Serial << X(3) << ',';
-	Serial << X(6) << ',';
-	Serial << U(0) << '\n';
+	// Serial << X(0) << ',';
+	// Serial << X(3) << ',';
+	// Serial << X(6) << ',';
+	// Serial << U(0) << '\n';
 	// Serial << X(1) << ',';
 	// Serial << X(4) << ',';
 	// Serial << X(7) << ',';
 	// Serial << U(1) << '\n';
-	// Serial << X(2) << ',';
-	// Serial << X(5) << ',';
-	// Serial << X(8) << ',';
-	// Serial << U(2) << '\n';
+	Serial << X(2) << ',';
+	Serial << X(5) << ',';
+	Serial << X(8) << ',';
+	Serial << U(2) << '\n';
 	// Serial << X(0) << ',';
 	// Serial << X(1) << ',';
 	// Serial << X(2) << ',';

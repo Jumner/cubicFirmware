@@ -80,9 +80,9 @@ void setup()
 
 	// Attach tachometer interrupts
 	attachInterrupt(digitalPinToInterrupt(2), dmpDataReady, RISING); // 6050
-	attachPCINT(digitalPinToPCINT(8), int0, CHANGE);								 // Pin 2 is mpu interrupt
-	attachPCINT(digitalPinToPCINT(3), int1, CHANGE);
-	attachPCINT(digitalPinToPCINT(4), int2, CHANGE);
+	attachPCINT(digitalPinToPCINT(8), int2, RISING);								 // Pin 2 is mpu interrupt
+	attachPCINT(digitalPinToPCINT(3), int1, RISING);
+	attachPCINT(digitalPinToPCINT(4), int0, RISING);
 
 	mpuIntStatus = imu.getIntStatus();
 
@@ -110,15 +110,15 @@ void loop()
 		// cube.motors[1].setPwm(200, true);
 		// cube.motors[2].setPwm(200, true);
 		// cube.printState();
-		if (cube.motors[0].rps > 100)
+		if (cube.motors[0].rps > 75)
 		{
 			safe("m0");
 		}
-		else if (cube.motors[1].rps > 100)
+		else if (cube.motors[1].rps > 75)
 		{
 			safe("m1");
 		}
-		else if (cube.motors[2].rps > 100)
+		else if (cube.motors[2].rps > 75)
 		{
 			safe("m2");
 		}

@@ -30,7 +30,7 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	ap.z = -a.z / 1670.03;
 	// Serial.println(t);
 
-	t[0] = atan(ap.z / ap.y) - atan(1);
+	t[0] = atan(ap.z / ap.y) - atan(1) - 0.028;
 	t[1] = atan(ap.x / ap.z) - atan(1) - 0.028;
 	t[2] = atan(ap.y / ap.x) - atan(1);
 
@@ -39,7 +39,7 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 
 	// State estimation
-	float prioriGain = 0.50f; // turn up to prioritize prediction
+	float prioriGain = 0.85f; // turn up to prioritize prediction
 	float yGain = 1.0 - prioriGain;
 	t[0] *= yGain;
 	t[0] += aPriori(0) * prioriGain;
@@ -87,7 +87,7 @@ BLA::Matrix<3, 9> Cubic::getK()
 	// return {-3, 0, 0, -1, 0, 0, 0.01, 0, 0,
 	// 				0, -3, 0, 0, -1, 0, 0, 0.01, 0,
 	// 				0, 0, -3, 0, 0, -1, 0, 0, 0.01};
-	return {-0.5, 0, 0, -4, 0, 0, 0.001, 0, 0,
+	return {-0.0, 0, 0, -4, 0, 0, 0.001, 0, 0,
 					0, -0.5, 0, 0, -4, 0, 0, 0.001, 0, // 2, 6, 0.001 works kinda
 					0, 0, -0.5, 0, 0, -4, 0, 0, 0.001};
 }
@@ -99,7 +99,7 @@ void Cubic::measureY(float t[3], VectorInt16 td)
 
 void Cubic::calculateU()
 {
-	float oldGain = 0.1f;
+	float oldGain = 0.25f;
 	float newGain = 1.0f - oldGain;
 	U = -getK() * X * newGain + U * oldGain;
 }
@@ -152,17 +152,17 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 
 void Cubic::printState()
 {
-	Serial << X(1) << ',';
-	Serial << X(4) << ',';
-	Serial << X(7) << ',';
-	Serial << U(1) << '\n';
 	// Serial << X(0) << ',';
 	// Serial << X(3) << ',';
-	// Serial << X(6) << ',';
+	Serial << X(6) << ',';
 	// Serial << U(0) << '\n';
+	// Serial << X(1) << ',';
+	// Serial << X(4) << ',';
+	Serial << X(7) << ',';
+	// Serial << U(1) << '\n';
 	// Serial << X(2) << ',';
 	// Serial << X(5) << ',';
-	// Serial << X(8) << ',';
+	Serial << X(8) << '\n';
 	// Serial << U(2) << '\n';
 	// Serial << X(0) << ',';
 	// Serial << X(1) << ',';

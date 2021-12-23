@@ -7,7 +7,6 @@ Motor::Motor(int n)
 	pwm = 9 + n;
 
 	// Set pin modes
-	pinMode(tach, INPUT_PULLUP);
 	pinMode(cw, OUTPUT);
 	pinMode(pwm, OUTPUT);
 
@@ -23,12 +22,12 @@ Motor::~Motor()
 
 void Motor::interrupt(void)
 {
-	if (digitalRead(tach))
-	{
-		oldrps = rps;
-		rps = 31415.9 / (micros() - oldTime);
-		oldTime = micros();
-	}
+	// if (digitalRead(tach))
+	// {
+	oldrps = rps;
+	rps = 31415.9 / (micros() - oldTime);
+	oldTime = micros();
+	// }
 }
 
 void Motor::setPwm(int val, bool dir)

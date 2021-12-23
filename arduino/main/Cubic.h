@@ -10,7 +10,7 @@ public:
 	BLA::Matrix<9> X;																	// 36 bytes
 	BLA::Matrix<9> Y;																	// 36 bytes
 	BLA::Matrix<3> U;																	// 12 bytes
-	Motor motors[3] = {Motor(0), Motor(1), Motor(2)}; // 54 bytes
+	Motor motors[3] = {Motor(2), Motor(1), Motor(0)}; // 54 bytes
 	BLA::Matrix<3, 9> getK();
 	void measureY(float t[3], VectorInt16 td);
 	void calculateU();

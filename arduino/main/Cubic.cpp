@@ -144,8 +144,8 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 	calculateU();
 	// motors[1].setTorque(U(0), Y(7));
 	printState();
-	// motors[0].setTorque(U(0), X(6)); // X
-	// motors[1].setTorque(U(1), X(7)); // Y
+	motors[0].setTorque(U(0), X(6)); // X
+	motors[1].setTorque(U(1), X(7)); // Y
 	motors[2].setTorque(U(2), X(8)); // Z
 																	 // 🙏
 }

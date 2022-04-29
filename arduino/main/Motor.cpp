@@ -2,7 +2,7 @@
 #include <Arduino.h>
 Motor::Motor(int n)
 {
-	tach = n == 0 ? 8 : 2 + n;
+	tach = n == 2 ? 8 : 2 + n;
 	cw = 5 + n;
 	pwm = 9 + n;
 
@@ -47,7 +47,7 @@ void Motor::setTorque(double t, double vel)
 {
 	if (t < 0)
 	{
-		vel *= -1;
+		vel *= -1; // make velocity relative
 	}
 	double decimalVal = abs(t / (0.0625 - 0.000743 * vel - 0.00000348 * vel * vel + 0.0000000429 * vel * vel * vel));
 	int val = 245 - 245 * max(min(decimalVal, 1), 0);

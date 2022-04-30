@@ -48,14 +48,13 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	t[2] *= yGain;
 	t[2] += aPriori(2) * prioriGain;
 
-	float spCorrectRate = 0.01;
+	float spCorrectRate = 0.02;
 	for (int i = 0; i < 3; i++) {
-		if (aPriori(6+i) > 0) {
+		if (aPriori(i) > 0) {
 			spCorrect[i] += spCorrectRate * dt;
 		} else {
 			spCorrect[i] -= spCorrectRate * dt;
 		}
-		t[i] += spCorrect[i];
 	}
 
 	measureY(t, td); // Measure the output/state (full state feedback (kinda?))
@@ -92,7 +91,7 @@ BLA::Matrix<3, 9> Cubic::getK()
 	// 				0, 0, -3, 0, 0, -1, 0, 0, 0.01};
 	return { -0.5, 0, 0, -4, 0, 0, 0.001, 0, 0,
 		0, -0.5, 0, 0, -4, 0, 0, 0.001, 0, // 2, 6, 0.001 works kinda
-		0, 0, -2, 0, 0, -2, 0, 0, 0.005 };
+		0, 0, -3, 0, 0, -2, 0, 0, 0.001 };
 }
 
 void Cubic::measureY(float t[3], VectorInt16 td)
@@ -104,7 +103,8 @@ void Cubic::calculateU()
 {
 	float oldGain = 0.1f;
 	float newGain = 1.0f - oldGain;
-	U = -getK() * X * newGain + U * oldGain;
+  BLA::Matrix<9> offset = {spCorrect[0],spCorrect[1],spCorrect[2],0,0,0,0,0,0}; 
+	U = -getK() * (X + offset) * newGain + U * oldGain;
 }
 
 BLA::Matrix<9, 9> Cubic::getA()
@@ -167,7 +167,8 @@ void Cubic::printState()
 	Serial << "Rate:" << X(5) << ',';
 	float rate = X(8) / 40.0;
 	Serial << "WheelRate:" << rate << ',';
-	Serial << "SpCorrect:" << spCorrect[2] << ',';
+  float spRate = spCorrect[2] * 10.0;
+	Serial << "SpCorrect:" << spRate << ',';
 	Serial << "Output:" << U(2) << '\n';
 	// Serial << X(0) << ',';
 	// Serial << X(1) << ',';

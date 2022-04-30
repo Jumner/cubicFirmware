@@ -16,6 +16,7 @@ Error codes:
 */
 
 Cubic cube = Cubic();
+unsigned long time;
 MPU6050 imu;
 
 // MPU control/status vars
@@ -89,8 +90,8 @@ void setup()
 	packetSize = imu.dmpGetFIFOPacketSize();
 	Serial.println("done");
 	delay(1000);
+	time = micros();
 }
-unsigned long time = micros();
 void loop()
 {
 	// safe("not gonna do stuff");

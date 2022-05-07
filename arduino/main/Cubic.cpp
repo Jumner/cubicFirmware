@@ -48,12 +48,20 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	t[2] *= yGain;
 	t[2] += aPriori(2) * prioriGain;
 
-	float spCorrectRate = 0.02;
+  float spCorrectRate = 0.5;
+  float maxAngle = 0.025;
+//  float spCorrectRate = 0.5;
 	for (int i = 0; i < 3; i++) {
-		if (aPriori(i) > 0) {
-			spCorrect[i] += spCorrectRate * dt;
+    spCorrect[i] -= U(i) * spCorrectRate * dt;
+    spCorrect[i] = constrain(spCorrect[i], -maxAngle, maxAngle);
+		if (aPriori(i) < 0) {
+//			spCorrect[i] = spCorrectRate;
+//  spCorrect[i] -= spCorrectRate * dt;
+
 		} else {
-			spCorrect[i] -= spCorrectRate * dt;
+//			spCorrect[i] = -spCorrectRate;
+//  spCorrect[i] += spCorrectRate * dt;
+
 		}
 	}
 
@@ -99,12 +107,24 @@ void Cubic::measureY(float t[3], VectorInt16 td)
 	Y = { t[0], t[1], t[2], td.x / 7509.87263606, td.y / 7509.87263606, -td.z / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps };
 }
 
-void Cubic::calculateU()
+void Cubic::calculateU(float dt)
 {
-	float oldGain = 0.1f;
+	BLA::Matrix<3> pid = { 0.0, 0.0, 0.0 };
+	float kp = 0.5;
+	float ki = 5.0;
+	float kd = 0.0;
+	float kw = 0.0;
+	for (int i = 0; i < 3; i++) {
+//   float err = spCorrect[i]-X(i);
+   float err = X(i)-spCorrect[i];
+//		float err = -X(i);
+		pid(i) = (err)*kp + (X(3 + i)) * kd + (integral[i]) * ki + X(6 + i) * kw;
+		integral[i] += (err)*dt;
+	}
+
+	float oldGain = 0.05f;
 	float newGain = 1.0f - oldGain;
-  BLA::Matrix<9> offset = {spCorrect[0],spCorrect[1],spCorrect[2],0,0,0,0,0,0}; 
-	U = -getK() * (X + offset) * newGain + U * oldGain;
+	U = pid * newGain + U * oldGain;
 }
 
 BLA::Matrix<9, 9> Cubic::getA()
@@ -144,7 +164,7 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 {
 
 	calculateX(a, td, dt); // Kaaaaaaal?
-	calculateU();
+	calculateU(dt);
 	// motors[1].setTorque(U(0), Y(7));
 	printState();
 	// motors[0].setTorque(U(0), X(6)); // X
@@ -167,7 +187,7 @@ void Cubic::printState()
 	Serial << "Rate:" << X(5) << ',';
 	float rate = X(8) / 40.0;
 	Serial << "WheelRate:" << rate << ',';
-  float spRate = spCorrect[2] * 10.0;
+	float spRate = spCorrect[2] * 10.0;
 	Serial << "SpCorrect:" << spRate << ',';
 	Serial << "Output:" << U(2) << '\n';
 	// Serial << X(0) << ',';

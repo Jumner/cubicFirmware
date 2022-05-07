@@ -123,6 +123,10 @@ void loop()
 		{
 			safe("m2");
 		}
+    else if (abs(cube.X(2)) > 0.6) {
+      float val = cube.X(2);
+      safe("t2: " + String(val));
+    }
 	}
 }
 

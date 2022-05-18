@@ -43,6 +43,22 @@ void Motor::setPwm(int val, bool dir)
 	analogWrite(pwm, val);
 }
 
+void Motor::setValue(float val) {
+  int pwm = 245*(1-max(min(abs(val), 1),0));
+  setPwm(pwm, val > 0);
+}
+
+bool Motor::stop(float vel) {
+  // Stop the motor
+  if (rps > 1) {
+     setTorque(-vel*0.00001, vel);
+  } else {
+    setPwm(255,false);
+    return false;  
+  }
+  return true;
+}
+
 void Motor::setTorque(double t, double vel)
 {
 	if (t < 0)

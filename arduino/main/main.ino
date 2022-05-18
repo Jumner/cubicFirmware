@@ -92,6 +92,7 @@ void setup()
 	delay(1000);
 	time = micros();
 }
+bool isSafe = false;
 void loop()
 {
 	// safe("not gonna do stuff");
@@ -104,29 +105,30 @@ void loop()
 		imu.getRotation(&gyro.x, &gyro.y, &gyro.z);
 		double dt = (micros() - time) / (1000000.0); // In secs
 		time = micros();
-		cube.run(accel, gyro, dt); // "It just works"
-		// Serial << accel.x << ', ' << accel.y << ', ' << accel.z << '\n';
-		// Serial.println();
-		// cube.motors[0].setPwm(200, true);
-		// cube.motors[1].setPwm(200, true);
-		// cube.motors[2].setPwm(200, true);
-		// cube.printState();
-		if (cube.motors[0].rps > 75)
-		{
-			safe("m0");
-		}
-		else if (cube.motors[1].rps > 75)
-		{
-			safe("m1");
-		}
-		else if (cube.motors[2].rps > 75)
-		{
-			safe("m2");
-		}
-    else if (abs(cube.X(2)) > 0.6) {
-      float val = cube.X(2);
-      safe("t2: " + String(val));
-    }
+    if (isSafe) {
+      cube.calculateX(accel, gyro, dt);
+      if(!cube.stop()) {
+        safe("motor");
+      }
+    } else {
+      cube.run(accel, gyro, dt); // "It just works"
+  		// Serial << accel.x << ', ' << accel.y << ', ' << accel.z << '\n';
+  		// Serial.println();
+  		// cube.motors[0].setPwm(200, true);
+  		// cube.motors[1].setPwm(200, true);
+  		// cube.motors[2].setPwm(200, true);
+  		// cube.printState();
+      for(int i = 0; i < 3; i ++ ) {
+        if (cube.motors[i].rps > 60) {
+          isSafe = true;
+        }
+        else if (abs(cube.X(2)) > 0.6) {
+        float val = cube.X(i);
+        safe("theta: " + String(val));
+      }
+      }
+      
+  	}
 	}
 }
 
@@ -148,8 +150,8 @@ void safe(String s)
 	cube.motors[0].setPwm(255, true);
 	cube.motors[1].setPwm(255, true);
 	cube.motors[2].setPwm(255, true);
-	Serial.print("Fatal Err: ");
-	Serial.println(s);
+//	Serial.print("Fatal Err: ");
+//	Serial.println(s);
 	while (true)
 	{
 		delay(10000);

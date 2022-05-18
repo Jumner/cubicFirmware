@@ -13,7 +13,9 @@ public:
 	~Motor();
 	void interrupt();
 	void setPwm(int val, bool dir);
+  void setValue(float val);
 	void setTorque(double t, double vel);
+  bool stop(float vel);
 	double rps;		 // 8 bytes
 	double oldrps; // 8 bytes
 };

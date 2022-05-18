@@ -11,6 +11,7 @@ class Cubic // 462 bytes
 	BLA::Matrix<9> Y;																		// 36 bytes
 	BLA::Matrix<3> U;																		// 12 bytes
 	Motor motors[3] = { Motor(2), Motor(1), Motor(0) }; // 54 bytes
+  bool stop();
 	float spCorrect[3] = { 0.0, 0.0, 0.0 };
 	float integral[3] = { 0.0, 0.0, 0.0 };
 	BLA::Matrix<3, 9> getK();

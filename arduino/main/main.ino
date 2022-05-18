@@ -148,8 +148,8 @@ void safe(String s)
 	cube.motors[0].setPwm(255, true);
 	cube.motors[1].setPwm(255, true);
 	cube.motors[2].setPwm(255, true);
-	Serial.print("Fatal Err: ");
-	Serial.println(s);
+//	Serial.print("Fatal Err: ");
+//	Serial.println(s);
 	while (true)
 	{
 		delay(10000);

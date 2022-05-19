@@ -114,7 +114,7 @@ void loop()
     } else {
       cube.run(accel, gyro, dt); // "It just works"
       for(int i = 0; i < 3; i ++ ) {
-        if (cube.motors[i].rps > 85) {
+        if (cube.motors[i].rps > 90) {
           isSafe = true;
         }
         else if (abs(cube.X(2)) > 0.6) {

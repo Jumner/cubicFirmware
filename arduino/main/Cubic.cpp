@@ -48,11 +48,13 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	t[2] *= yGain;
 	t[2] += aPriori(2) * prioriGain;
 
-  float spCorrectRate = 10;
+  float spCorrectRate = 10.0;
+//  float spCorrectRate = 0.05;
   float maxAngle = 0.1;
 //  float spCorrectRate = 0.5;
 	for (int i = 0; i < 3; i++) {
     spCorrect[i] -= U(i) * spCorrectRate * dt;
+//    spCorrect[i] -= X(i) * spCorrectRate * dt;
     spCorrect[i] = constrain(spCorrect[i], -maxAngle, maxAngle);
 	}
 

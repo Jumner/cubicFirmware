@@ -36,7 +36,7 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
-	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U*0.1) * dt;
+	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 
 	// State estimation
 	float prioriGain = 0.05f; // turn up to prioritize prediction
@@ -48,33 +48,17 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	t[2] *= yGain;
 	t[2] += aPriori(2) * prioriGain;
 
-  float spCorrectRate = 0.5;
-  float maxAngle = 0.025;
+  float spCorrectRate = 10;
+  float maxAngle = 0.1;
 //  float spCorrectRate = 0.5;
 	for (int i = 0; i < 3; i++) {
     spCorrect[i] -= U(i) * spCorrectRate * dt;
     spCorrect[i] = constrain(spCorrect[i], -maxAngle, maxAngle);
-		if (aPriori(i) < 0) {
-//			spCorrect[i] = spCorrectRate;
-//  spCorrect[i] -= spCorrectRate * dt;
-
-		} else {
-//			spCorrect[i] = -spCorrectRate;
-//  spCorrect[i] += spCorrectRate * dt;
-
-		}
 	}
 
 	measureY(t, td); // Measure the output/state (full state feedback (kinda?))
 	// BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 	signY(aPriori);
-	// Serial.print("Estimated State: ");
-	// Serial << X << " U: " << U << '\n';
-	// Serial << "U" << U << '\n';
-	// Serial.print("aPriori: ");
-	// Serial << aPriori << '\n';
-	// Serial.print("U: ");
-	// Serial << U << '\n';
 	X = Y; // Sadge
 }
 
@@ -109,20 +93,17 @@ void Cubic::measureY(float t[3], VectorInt16 td)
 
 void Cubic::calculateU(float dt)
 {
+//  pidw[2] += 0.1*dt;
 	BLA::Matrix<3> pid = { 0.0, 0.0, 0.0 };
-	float kp = 10.0;
-	float ki = 40.0;
-	float kd = 0.01;
-	float kw = 0.0;
 	for (int i = 0; i < 3; i++) {
 //   float err = spCorrect[i]-X(i);
-   float err = X(i);//-spCorrect[i];
-//		float err = -X(i);
-		pid(i) = (err)*kp + (X(3 + i)) * kd + (integral[i]) * ki + X(6 + i) * kw;
+   float err = X(i)-spCorrect[i];
+//		float err = X(i);
+		pid(i) = (err)*pidw[0] + (X(3 + i)) * pidw[2] + (integral[i]) * pidw[1] - X(6 + i) * pidw[3];
 		integral[i] += (err)*dt;
 	}
 
-	float oldGain = 0.05f;
+	float oldGain = 0.00f;
 	float newGain = 1.0f - oldGain;
 	U = pid * newGain + U * oldGain;
 }
@@ -169,21 +150,12 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 	printState();
 	// motors[0].setTorque(U(0), X(6)); // X
 	// motors[1].setTorque(U(1), X(7)); // Y
-//	motors[2].setTorque(U(2), X(8)); // Z
-  motors[2].setValue(U(2));
+	motors[2].setTorque(U(2), X(8)); // Z
 																	 // 🙏
 }
 
 void Cubic::printState()
 {
-	// Serial << X(0) << ',';
-	// Serial << X(3) << ',';
-	// Serial << X(6) << ',';
-	// Serial << U(0) << '\n';
-	// Serial << X(1) << ',';
-	// Serial << X(4) << ',';
-	// Serial << X(7) << ',';
-	// Serial << U(1) << '\n';
 	Serial << "Angle:" << X(2) << ',';
 	Serial << "Rate:" << X(5) << ',';
 	float rate = X(8) / 40.0;
@@ -191,36 +163,8 @@ void Cubic::printState()
 	float spRate = spCorrect[2] * 10.0;
 	Serial << "SpCorrect:" << spRate << ',';
 	Serial << "Output:" << U(2) << '\n';
-	// Serial << X(0) << ',';
-	// Serial << X(1) << ',';
-	// Serial << X(2) << ',';
-	// Serial << X(3) << ',';
-	// Serial << X(4) << ',';
-	// Serial << X(5) << ',';
-	// Serial << X(6) << ',';
-	// Serial << X(7) << ',';
-	// Serial << X(8) << ',';
-	// Serial << U(0) << ',';
-	// Serial << U(1) << ',';
-	// Serial << U(2) << '\n';
-	// Serial.print("Estimated State: ");
-	// Serial.print(Y(0));
-	// Serial.print(',');
-	// Serial.print(Y(1));
-	// Serial.print(',');
-	// Serial.print(Y(2));
-	// Serial.print(',');
-	// Serial.print(Y(3));
-	// Serial.print(',');
-	// Serial.print(Y(4));
-	// Serial.print(',');
-	// Serial.print(Y(5));
-	// Serial.print(',');
-	// Serial.print(Y(6));
-	// Serial.print(',');
-	// Serial.print(Y(7));
-	// Serial.print(',');
-	// Serial.println(Y(8));
+//  float pidPrint = pidw[2] * 10.0;
+//  Serial << "kd: " << pidPrint << '\n';
 }
 
 bool Cubic::stop() {

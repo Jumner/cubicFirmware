@@ -92,19 +92,20 @@ void setup()
 	delay(1000);
 	time = micros();
 }
+
 bool isSafe = false;
 void loop()
 {
 	// safe("not gonna do stuff");
-	if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
-	{
-		// imu.dmpGetQuaternion(&q, fifoBuffer);
-		// imu.dmpGetEuler(euler, &q); // Get euler angles
-		// imu.dmpGetGyro(&gyro, fifoBuffer);													// Get gyro
-		imu.getAcceleration(&accel.x, &accel.y, &accel.z);
-		imu.getRotation(&gyro.x, &gyro.y, &gyro.z);
-		double dt = (micros() - time) / (1000000.0); // In secs
-		time = micros();
+  if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
+  {
+    // imu.dmpGetQuaternion(&q, fifoBuffer);
+    // imu.dmpGetEuler(euler, &q); // Get euler angles
+    // imu.dmpGetGyro(&gyro, fifoBuffer);                         // Get gyro
+    imu.getAcceleration(&accel.x, &accel.y, &accel.z);
+    imu.getRotation(&gyro.x, &gyro.y, &gyro.z);
+    double dt = (micros() - time) / (1000000.0); // In secs
+    time = micros();
     if (isSafe) {
       cube.calculateX(accel, gyro, dt);
       if(!cube.stop()) {
@@ -112,24 +113,19 @@ void loop()
       }
     } else {
       cube.run(accel, gyro, dt); // "It just works"
-  		// Serial << accel.x << ', ' << accel.y << ', ' << accel.z << '\n';
-  		// Serial.println();
-  		// cube.motors[0].setPwm(200, true);
-  		// cube.motors[1].setPwm(200, true);
-  		// cube.motors[2].setPwm(200, true);
-  		// cube.printState();
       for(int i = 0; i < 3; i ++ ) {
-        if (cube.motors[i].rps > 60) {
+        if (cube.motors[i].rps > 85) {
           isSafe = true;
         }
         else if (abs(cube.X(2)) > 0.6) {
         float val = cube.X(i);
-        safe("theta: " + String(val));
+//        safe("theta: " + String(val));
+        isSafe = true;
       }
       }
       
-  	}
-	}
+    }
+  }
 }
 
 void int0(void)

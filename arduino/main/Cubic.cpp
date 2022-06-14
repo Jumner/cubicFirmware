@@ -20,7 +20,8 @@ Cubic::Cubic()
 Cubic::~Cubic()
 {
 }
-
+//float sum[3] = {0.0,0.0,0.0};
+//int count = 0;
 void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 {
 	float t[3]; // theta
@@ -30,9 +31,16 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	ap.z = -a.z / 1670.03;
 	// Serial.println(t);
 
-	t[0] = atan(ap.z / ap.y) - atan(1);
-	t[1] = atan(ap.x / ap.z) - atan(1);
-	t[2] = abs(atan(ap.y / ap.x)) - atan(1);
+	t[0] = atan(ap.z / ap.y) - atan(1) + 0.04;
+	t[1] = atan(ap.x / ap.z) - atan(1) - 0.03;
+	t[2] = abs(atan(ap.y / ap.x)) - atan(1) - 0.02;
+//  sum[0] += t[0];
+//  sum[1] += t[1];
+//  sum[2] += t[2];
+//  count ++;
+//  float avg[3] = {sum[0]/count, sum[1]/count, sum[2]/count};
+//  
+//  Serial << "ANGLES: " << avg[0] << ", " << avg[1] << ", " << avg[2] << '\n';
 
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback

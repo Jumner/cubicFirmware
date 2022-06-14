@@ -117,7 +117,7 @@ void loop()
         if (cube.motors[i].rps > 90) {
           isSafe = true;
         }
-        else if (abs(cube.X(2)) > 0.6) {
+        else if (abs(cube.X(1)) > 0.6) {
         float val = cube.X(i);
 //        safe("theta: " + String(val));
         isSafe = true;

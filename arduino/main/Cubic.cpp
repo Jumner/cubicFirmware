@@ -32,7 +32,7 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	// Serial.println(t);
 
 	t[0] = atan(ap.z / ap.y) - atan(1) + 0.04;
-	t[1] = atan(ap.x / ap.z) - atan(1) - 0.03;
+	t[1] = atan(ap.x / ap.z) - atan(1) - 0.04;
 	t[2] = abs(atan(ap.y / ap.x)) - atan(1) - 0.02;
 //  sum[0] += t[0];
 //  sum[1] += t[1];
@@ -159,20 +159,20 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 	// motors[1].setTorque(U(0), Y(7));
 	printState();
 	// motors[0].setTorque(U(0), X(6)); // X
-	// motors[1].setTorque(U(1), X(7)); // Y
-	motors[2].setTorque(U(2), X(8)); // Z
+	 motors[1].setTorque(U(1), X(7)); // Y
+//	motors[2].setTorque(U(2), X(8)); // Z
 																	 // 🙏
 }
 
 void Cubic::printState()
 {
-	Serial << "Angle:" << X(2) << ',';
-	Serial << "Rate:" << X(5) << ',';
-	float rate = X(8) / 40.0;
+	Serial << "Angle:" << X(1) << ',';
+	Serial << "Rate:" << X(4) << ',';
+	float rate = X(7) / 40.0;
 	Serial << "WheelRate:" << rate << ',';
-	float spRate = spCorrect[2] * 10.0;
+	float spRate = spCorrect[1] * 10.0;
 	Serial << "SpCorrect:" << spRate << ',';
-	Serial << "Output:" << U(2) << '\n';
+	Serial << "Output:" << U(1) << '\n';
 //  float pidPrint = pidw[2] * 10.0;
 //  Serial << "kd: " << pidPrint << '\n';
 }
@@ -180,9 +180,9 @@ void Cubic::printState()
 bool Cubic::stop() {
   // stop all motors
   bool cont = false;
-//  for (int i = 0; i < 3; i++) {
-  int i = 2; // 2d
+  for (int i = 0; i < 3; i++) {
+//  int i = 1; // 2d
     cont = cont || motors[i].stop(X(i+6));
-//  }
+  }
   return cont;
 }

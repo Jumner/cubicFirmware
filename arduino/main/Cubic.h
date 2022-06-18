@@ -27,4 +27,7 @@ class Cubic // 462 bytes
 
 	Cubic();
 	~Cubic();
+
+ float cost();
+ float avgCost;
 };

@@ -30,10 +30,10 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	ap.y = a.y / 1670.03;
 	ap.z = -a.z / 1670.03;
 	// Serial.println(t);
-
-	t[0] = atan(ap.z / ap.y) - atan(1) + 0.04;
-	t[1] = atan(ap.x / ap.z) - atan(1) - 0.04;
-	t[2] = abs(atan(ap.y / ap.x)) - atan(1) - 0.02;
+  float deg = PI/4;
+	t[0] = abs(atan(ap.z / ap.y)) - deg + 0.04;
+	t[1] = abs(atan(ap.x / ap.z)) - deg - 0.05;
+	t[2] = abs(atan(ap.y / ap.x)) - deg - 0.02;
 //  sum[0] += t[0];
 //  sum[1] += t[1];
 //  sum[2] += t[2];
@@ -62,7 +62,6 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 //  float spCorrectRate = 0.5;
 	for (int i = 0; i < 3; i++) {
     spCorrect[i] -= U(i) * spCorrectRate * dt;
-//    spCorrect[i] -= X(i) * spCorrectRate * dt;
     spCorrect[i] = constrain(spCorrect[i], -maxAngle, maxAngle);
 	}
 
@@ -158,10 +157,9 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 	calculateU(dt);
 	// motors[1].setTorque(U(0), Y(7));
 	printState();
-	// motors[0].setTorque(U(0), X(6)); // X
+//	 motors[0].setTorque(U(0), X(6)); // X
 	 motors[1].setTorque(U(1), X(7)); // Y
 //	motors[2].setTorque(U(2), X(8)); // Z
-																	 // 🙏
 }
 
 void Cubic::printState()
@@ -172,7 +170,9 @@ void Cubic::printState()
 	Serial << "WheelRate:" << rate << ',';
 	float spRate = spCorrect[1] * 10.0;
 	Serial << "SpCorrect:" << spRate << ',';
-	Serial << "Output:" << U(1) << '\n';
+	Serial << "Output:" << U(1) << ',';
+  Serial << "Avg Cost: " << avgCost << ',';
+  Serial << "Cost: " << cost() << '\n';
 //  float pidPrint = pidw[2] * 10.0;
 //  Serial << "kd: " << pidPrint << '\n';
 }
@@ -185,4 +185,25 @@ bool Cubic::stop() {
     cont = cont || motors[i].stop(X(i+6));
   }
   return cont;
+}
+
+// Gradient Descent
+float Cubic::cost() {
+  // Try and determine the cost QUICKLY to allow for gradient descent
+  float cost = 0;
+  
+  float stateK[3] = {1.0, 1.0, 1.0};
+  cost += abs(X(1) * stateK[0]) + abs(X(4) * stateK[1]) + abs(X(7) * stateK[1]);  
+  
+  float inputK = 1.0;
+  cost += abs(U(1) * inputK);
+
+  if (avgCost) {
+    float costGain = 0.05;
+    avgCost = avgCost * (1-costGain) + costGain*cost;
+  } else {
+    avgCost = cost;
+  }
+  
+  return cost;
 }

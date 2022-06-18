@@ -28,6 +28,9 @@ class Cubic // 462 bytes
 	Cubic();
 	~Cubic();
 
- float cost();
+ void getCost(float dt);
+ float cost;
  float avgCost;
+ float dCost;
+ float avgdCost;
 };

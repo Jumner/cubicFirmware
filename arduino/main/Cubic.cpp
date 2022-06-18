@@ -156,6 +156,7 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 	calculateX(a, td, dt); // Kaaaaaaal?
 	calculateU(dt);
 	// motors[1].setTorque(U(0), Y(7));
+  getCost(dt);
 	printState();
 //	 motors[0].setTorque(U(0), X(6)); // X
 	 motors[1].setTorque(U(1), X(7)); // Y
@@ -164,15 +165,17 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 
 void Cubic::printState()
 {
-	Serial << "Angle:" << X(1) << ',';
-	Serial << "Rate:" << X(4) << ',';
-	float rate = X(7) / 40.0;
-	Serial << "WheelRate:" << rate << ',';
-	float spRate = spCorrect[1] * 10.0;
-	Serial << "SpCorrect:" << spRate << ',';
-	Serial << "Output:" << U(1) << ',';
-  Serial << "Avg Cost: " << avgCost << ',';
-  Serial << "Cost: " << cost() << '\n';
+//	Serial << "Angle:" << X(1) << ',';
+//	Serial << "Rate:" << X(4) << ',';
+//	float rate = X(7) / 40.0;
+//	Serial << "WheelRate:" << rate << ',';
+//	float spRate = spCorrect[1] * 10.0;
+//	Serial << "SpCorrect:" << spRate << ',';
+//	Serial << "Output:" << U(1) << ',';
+  Serial << "Cost: " << cost << ',';
+  Serial << "AvgCost: " << avgCost << ',';
+  Serial << "dCost: " << dCost << ',';
+  Serial << "AvgdCost: " << avgdCost << '\n';
 //  float pidPrint = pidw[2] * 10.0;
 //  Serial << "kd: " << pidPrint << '\n';
 }
@@ -188,22 +191,29 @@ bool Cubic::stop() {
 }
 
 // Gradient Descent
-float Cubic::cost() {
+void Cubic::getCost(float dt) {
   // Try and determine the cost QUICKLY to allow for gradient descent
-  float cost = 0;
+  cost = 0;
   
-  float stateK[3] = {1.0, 1.0, 1.0};
+  float stateK[3] = {1.0, 0.25, 0.025};
   cost += abs(X(1) * stateK[0]) + abs(X(4) * stateK[1]) + abs(X(7) * stateK[1]);  
   
-  float inputK = 1.0;
+  float inputK = 2.0;
   cost += abs(U(1) * inputK);
 
   if (avgCost) {
     float costGain = 0.05;
+    dCost = -avgCost;
     avgCost = avgCost * (1-costGain) + costGain*cost;
+    dCost += avgCost; // Difference
+    dCost /= dt;
+    if (avgdCost) {
+      float dCostGain = 0.1;
+      avgdCost = avgdCost * (1-dCostGain) + dCostGain*dCost;
+    } else {
+      avgdCost = dCost;
+    }
   } else {
     avgCost = cost;
   }
-  
-  return cost;
 }

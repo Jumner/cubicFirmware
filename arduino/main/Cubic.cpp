@@ -47,7 +47,6 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	for (int i = 0; i < 3; i++) {
     spCorrect[i] -= U(i) * spCorrectRate * dt;
     spCorrect[i] = constrain(spCorrect[i], -maxAngle, maxAngle); // Stop windup on the anti windup. Sheeesh
-//    spCorrect[i] = constrain(-X(6+i), -maxAngle, maxAngle); // This is (Theoretically) so much better TODO
 	}
 
 	measureY(t, td); // Measure the output/state (full state feedback (kinda?))

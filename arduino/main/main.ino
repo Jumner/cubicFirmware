@@ -99,15 +99,12 @@ void loop()
 	// safe("not gonna do stuff");
   if (imu.dmpGetCurrentFIFOPacket(fifoBuffer))
   {
-    // imu.dmpGetQuaternion(&q, fifoBuffer);
-    // imu.dmpGetEuler(euler, &q); // Get euler angles
-    // imu.dmpGetGyro(&gyro, fifoBuffer);                         // Get gyro
     imu.getAcceleration(&accel.x, &accel.y, &accel.z);
     imu.getRotation(&gyro.x, &gyro.y, &gyro.z);
     double dt = (micros() - time) / (1000000.0); // In secs
     time = micros();
     if (isSafe) {
-      cube.calculateX(accel, gyro, dt);
+      cube.calculateX(accel, gyro, dt); // Wheel velocities are needed
       if(!cube.stop()) {
         safe("motor");
       }
@@ -117,9 +114,8 @@ void loop()
         if (cube.motors[i].rps > 90) {
           isSafe = true;
         }
-        else if (abs(cube.X(1)) > 0.6) {
+        else if (abs(cube.X(i)) > 0.6) {
         float val = cube.X(i);
-//        safe("theta: " + String(val));
         isSafe = true;
       }
       }
@@ -146,10 +142,8 @@ void safe(String s)
 	cube.motors[0].setPwm(255, true);
 	cube.motors[1].setPwm(255, true);
 	cube.motors[2].setPwm(255, true);
-//	Serial.print("Fatal Err: ");
-//	Serial.println(s);
 	while (true)
 	{
-		delay(10000);
+		delay(1000);
 	}
 }

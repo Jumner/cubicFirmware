@@ -17,11 +17,6 @@ Cubic::Cubic()
 	TCCR1B = TCCR1B & B11111000 | B00000001; // 9 & 10
 	TCCR2B = TCCR2B & B11111000 | B00000001; // 11
 }
-Cubic::~Cubic()
-{
-}
-//float sum[3] = {0.0,0.0,0.0};
-//int count = 0;
 void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 {
 	float t[3]; // theta
@@ -29,18 +24,10 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	ap.x = a.x / 1670.03;
 	ap.y = a.y / 1670.03;
 	ap.z = -a.z / 1670.03;
-	// Serial.println(t);
   float deg = PI/4;
 	t[0] = abs(atan(ap.z / ap.y)) - deg + 0.04;
 	t[1] = abs(atan(ap.x / ap.z)) - deg - 0.05;
 	t[2] = abs(atan(ap.y / ap.x)) - deg - 0.02;
-//  sum[0] += t[0];
-//  sum[1] += t[1];
-//  sum[2] += t[2];
-//  count ++;
-//  float avg[3] = {sum[0]/count, sum[1]/count, sum[2]/count};
-//  
-//  Serial << "ANGLES: " << avg[0] << ", " << avg[1] << ", " << avg[2] << '\n';
 
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
@@ -49,24 +36,21 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	// State estimation
 	float prioriGain = 0.05f; // turn up to prioritize prediction
 	float yGain = 1.0 - prioriGain;
-	t[0] *= yGain;
-	t[0] += aPriori(0) * prioriGain;
-	t[1] *= yGain;
-	t[1] += aPriori(1) * prioriGain;
-	t[2] *= yGain;
-	t[2] += aPriori(2) * prioriGain;
+  for (int i = 0; i < 3; i ++) {
+    t[i] *= yGain;
+    t[i] += aPriori(i) * prioriGain; // Only affects theta (only noisy val)
+  }
+	
 
   float spCorrectRate = 10.0;
-//  float spCorrectRate = 0.05;
   float maxAngle = 0.1;
-//  float spCorrectRate = 0.5;
 	for (int i = 0; i < 3; i++) {
     spCorrect[i] -= U(i) * spCorrectRate * dt;
-    spCorrect[i] = constrain(spCorrect[i], -maxAngle, maxAngle);
+    spCorrect[i] = constrain(spCorrect[i], -maxAngle, maxAngle); // Stop windup on the anti windup. Sheeesh
+//    spCorrect[i] = constrain(-X(6+i), -maxAngle, maxAngle); // This is (Theoretically) so much better TODO
 	}
 
 	measureY(t, td); // Measure the output/state (full state feedback (kinda?))
-	// BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 	signY(aPriori);
 	X = Y; // Sadge
 }
@@ -79,21 +63,6 @@ void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we
 		}
 	}
 }
-BLA::Matrix<3, 9> Cubic::getK()
-{ // This was precomputed with octave (open sauce matlab)
-	// return {-3.1908, 0, 0, -0.34042, 0, 0, -0.00031623, 0, 0,
-	// 				0, -3.1908, 0, 0, -0.34042, 0, 0, -0.00031623, 0,
-	// 				0, 0, -3.1908, 0, 0, -0.34042, 0, 0, -0.00031623};
-	// return {-5, 0, 0, 0.5, 0, 0, 0.007, 0, 0,
-	// 				0, -5, 0, 0, 0.5, 0, 0, 0.007, 0,
-	// 				0, 0, -5, 0, 0, 0.5, 0, 0, 0.007};
-	// return {-3, 0, 0, -1, 0, 0, 0.01, 0, 0,
-	// 				0, -3, 0, 0, -1, 0, 0, 0.01, 0,
-	// 				0, 0, -3, 0, 0, -1, 0, 0, 0.01};
-	return { -0.5, 0, 0, -4, 0, 0, 0.001, 0, 0,
-		0, -0.5, 0, 0, -4, 0, 0, 0.001, 0, // 2, 6, 0.001 works kinda
-		0, 0, -3, 0, 0, -2, 0, 0, 0.001 };
-}
 
 void Cubic::measureY(float t[3], VectorInt16 td)
 {
@@ -102,18 +71,13 @@ void Cubic::measureY(float t[3], VectorInt16 td)
 
 void Cubic::calculateU(float dt)
 {
-//  pidw[2] += 0.1*dt;
 	BLA::Matrix<3> pid = { 0.0, 0.0, 0.0 };
 	for (int i = 0; i < 3; i++) {
-//   float err = spCorrect[i]-X(i);
-   float err = X(i)-spCorrect[i];
-//		float err = X(i);
-		pid(i) = (err)*pidw[0] + (X(3 + i)) * pidw[2] + (integral[i]) * pidw[1] - X(6 + i) * pidw[3];
-		integral[i] += (err)*dt;
+    float err = X(i)-spCorrect[i];
+		pid(i) = (err)*pidw[0] + (X(3 + i)) * pidw[2] - X(6 + i) * pidw[3];
 	}
-
 	float oldGain = 0.00f;
-	float newGain = 1.0f - oldGain;
+	float newGain = 1.0f - oldGain; // Don't think ill need this hopefully the optimizer does its job :)
 	U = pid * newGain + U * oldGain;
 }
 
@@ -155,36 +119,32 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 
 	calculateX(a, td, dt); // Kaaaaaaal?
 	calculateU(dt);
-	// motors[1].setTorque(U(0), Y(7));
-  getCost(dt);
+//  getCost(dt);
 	printState();
-//	 motors[0].setTorque(U(0), X(6)); // X
-	 motors[1].setTorque(U(1), X(7)); // Y
-//	motors[2].setTorque(U(2), X(8)); // Z
+	motors[0].setTorque(U(0), X(6)); // X
+	motors[1].setTorque(U(1), X(7)); // Y
+	motors[2].setTorque(U(2), X(8)); // Z
 }
 
 void Cubic::printState()
 {
-//	Serial << "Angle:" << X(1) << ',';
-//	Serial << "Rate:" << X(4) << ',';
-//	float rate = X(7) / 40.0;
-//	Serial << "WheelRate:" << rate << ',';
-//	float spRate = spCorrect[1] * 10.0;
-//	Serial << "SpCorrect:" << spRate << ',';
-//	Serial << "Output:" << U(1) << ',';
-  Serial << "Cost: " << cost << ',';
-  Serial << "AvgCost: " << avgCost << ',';
-  Serial << "dCost: " << dCost << ',';
-  Serial << "AvgdCost: " << avgdCost << '\n';
-//  float pidPrint = pidw[2] * 10.0;
-//  Serial << "kd: " << pidPrint << '\n';
+	Serial << "Angle:" << X(1) << ',';
+	Serial << "Rate:" << X(4) << ',';
+	float rate = X(7) / 40.0;
+	Serial << "WheelRate:" << rate << ',';
+	float spRate = spCorrect[1] * 10.0;
+	Serial << "SpCorrect:" << spRate << ',';
+	Serial << "Output:" << U(1) << '\n';
+//  Serial << "Cost: " << cost << ',';
+//  Serial << "AvgCost: " << avgCost << ',';
+//  Serial << "dCost: " << dCost << ',';
+//  Serial << "AvgdCost: " << avgdCost << '\n';
 }
 
 bool Cubic::stop() {
   // stop all motors
   bool cont = false;
   for (int i = 0; i < 3; i++) {
-//  int i = 1; // 2d
     cont = cont || motors[i].stop(X(i+6));
   }
   return cont;

@@ -34,13 +34,6 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	t[0] = abs(atan(ap.z / ap.y)) - deg + 0.04;
 	t[1] = abs(atan(ap.x / ap.z)) - deg - 0.05;
 	t[2] = abs(atan(ap.y / ap.x)) - deg - 0.02;
-//  sum[0] += t[0];
-//  sum[1] += t[1];
-//  sum[2] += t[2];
-//  count ++;
-//  float avg[3] = {sum[0]/count, sum[1]/count, sum[2]/count};
-//  
-//  Serial << "ANGLES: " << avg[0] << ", " << avg[1] << ", " << avg[2] << '\n';
 
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback

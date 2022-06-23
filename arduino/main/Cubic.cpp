@@ -77,7 +77,7 @@ void Cubic::calculateU(float dt)
 	}
 	float oldGain = 0.00f;
 	float newGain = 1.0f - oldGain; // Don't think ill need this hopefully the optimizer does its job :)
-	U = pid * newGain + U * oldGain;
+	U = (pid * newGain + U * oldGain) / 10.0;
 }
 
 BLA::Matrix<9, 9> Cubic::getA()
@@ -127,13 +127,17 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 
 void Cubic::printState()
 {
-	Serial << "Angle:" << X(1) << ',';
-	Serial << "Rate:" << X(4) << ',';
-	float rate = X(7) / 40.0;
-	Serial << "WheelRate:" << rate << ',';
-	float spRate = spCorrect[1] * 10.0;
-	Serial << "SpCorrect:" << spRate << ',';
-	Serial << "Output:" << U(1) << '\n';
+  Serial << "t0: " << X(0) << ',';
+  Serial << "t1: " << X(1) << ',';
+  Serial << "t2: " << X(2) << '\n';
+//	Serial << "Angle:" << X(1) << ',';
+//	Serial << "Rate:" << X(4) << ',';
+//	float rate = X(7) / 40.0;
+//	Serial << "WheelRate:" << rate << ',';
+//	float spRate = spCorrect[1] * 10.0;
+//	Serial << "SpCorrect:" << spRate << ',';
+//	Serial << "Output:" << U(1) << '\n';
+
 //  Serial << "Cost: " << cost << ',';
 //  Serial << "AvgCost: " << avgCost << ',';
 //  Serial << "dCost: " << dCost << ',';

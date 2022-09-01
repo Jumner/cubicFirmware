@@ -14,7 +14,6 @@ class Cubic // 462 bytes
 	float spCorrect[3] = { 0.0, 0.0, 0.0 };
   float pidw[4] = {1.0, 0.0, 6.0, 0.0001 };
 	float integral[3] = { 0.0, 0.0, 0.0 };
-	BLA::Matrix<3, 9> getK();
 	void measureY(float t[3], VectorInt16 td);
   bool stop();
 	void calculateU(float dt);
@@ -27,10 +26,4 @@ class Cubic // 462 bytes
 
 	Cubic();
 	~Cubic();
-
- void getCost(float dt);
- float cost;
- float avgCost;
- float dCost;
- float avgdCost;
 };

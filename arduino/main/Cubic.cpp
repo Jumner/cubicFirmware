@@ -20,8 +20,7 @@ Cubic::Cubic()
 Cubic::~Cubic()
 {
 }
-//float sum[3] = {0.0,0.0,0.0};
-//int count = 0;
+
 void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 {
 	float t[3]; // theta
@@ -50,9 +49,7 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	t[2] += aPriori(2) * prioriGain;
 
   float spCorrectRate = 10.0;
-//  float spCorrectRate = 0.05;
   float maxAngle = 0.1;
-//  float spCorrectRate = 0.5;
 	for (int i = 0; i < 3; i++) {
     spCorrect[i] -= U(i) * spCorrectRate * dt;
     spCorrect[i] = constrain(spCorrect[i], -maxAngle, maxAngle);
@@ -72,21 +69,6 @@ void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we
 		}
 	}
 }
-BLA::Matrix<3, 9> Cubic::getK()
-{ // This was precomputed with octave (open sauce matlab)
-	// return {-3.1908, 0, 0, -0.34042, 0, 0, -0.00031623, 0, 0,
-	// 				0, -3.1908, 0, 0, -0.34042, 0, 0, -0.00031623, 0,
-	// 				0, 0, -3.1908, 0, 0, -0.34042, 0, 0, -0.00031623};
-	// return {-5, 0, 0, 0.5, 0, 0, 0.007, 0, 0,
-	// 				0, -5, 0, 0, 0.5, 0, 0, 0.007, 0,
-	// 				0, 0, -5, 0, 0, 0.5, 0, 0, 0.007};
-	// return {-3, 0, 0, -1, 0, 0, 0.01, 0, 0,
-	// 				0, -3, 0, 0, -1, 0, 0, 0.01, 0,
-	// 				0, 0, -3, 0, 0, -1, 0, 0, 0.01};
-	return { -0.5, 0, 0, -4, 0, 0, 0.001, 0, 0,
-		0, -0.5, 0, 0, -4, 0, 0, 0.001, 0, // 2, 6, 0.001 works kinda
-		0, 0, -3, 0, 0, -2, 0, 0, 0.001 };
-}
 
 void Cubic::measureY(float t[3], VectorInt16 td)
 {
@@ -98,9 +80,7 @@ void Cubic::calculateU(float dt)
 //  pidw[2] += 0.1*dt;
 	BLA::Matrix<3> pid = { 0.0, 0.0, 0.0 };
 	for (int i = 0; i < 3; i++) {
-//   float err = spCorrect[i]-X(i);
-   float err = X(i)-spCorrect[i];
-//		float err = X(i);
+    float err = X(i)-spCorrect[i];
 		pid(i) = (err)*pidw[0] + (X(3 + i)) * pidw[2] + (integral[i]) * pidw[1] - X(6 + i) * pidw[3];
 		integral[i] += (err)*dt;
 	}
@@ -148,8 +128,6 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 
 	calculateX(a, td, dt); // Kaaaaaaal?
 	calculateU(dt);
-	// motors[1].setTorque(U(0), Y(7));
-  getCost(dt);
 	printState();
 //	 motors[0].setTorque(U(0), X(6)); // X
 	 motors[1].setTorque(U(1), X(7)); // Y
@@ -165,10 +143,6 @@ void Cubic::printState()
 //	float spRate = spCorrect[1] * 10.0;
 //	Serial << "SpCorrect:" << spRate << ',';
 //	Serial << "Output:" << U(1) << ',';
-  Serial << "Cost: " << cost << ',';
-  Serial << "AvgCost: " << avgCost << ',';
-  Serial << "dCost: " << dCost << ',';
-  Serial << "AvgdCost: " << avgdCost << '\n';
 //  float pidPrint = pidw[2] * 10.0;
 //  Serial << "kd: " << pidPrint << '\n';
 }
@@ -181,32 +155,4 @@ bool Cubic::stop() {
     cont = cont || motors[i].stop(X(i+6));
   }
   return cont;
-}
-
-// Gradient Descent
-void Cubic::getCost(float dt) {
-  // Try and determine the cost QUICKLY to allow for gradient descent
-  cost = 0;
-  
-  float stateK[3] = {1.0, 0.25, 0.025};
-  cost += abs(X(1) * stateK[0]) + abs(X(4) * stateK[1]) + abs(X(7) * stateK[1]);  
-  
-  float inputK = 2.0;
-  cost += abs(U(1) * inputK);
-
-  if (avgCost) {
-    float costGain = 0.05;
-    dCost = -avgCost;
-    avgCost = avgCost * (1-costGain) + costGain*cost;
-    dCost += avgCost; // Difference
-    dCost /= dt;
-    if (avgdCost) {
-      float dCostGain = 0.1;
-      avgdCost = avgdCost * (1-dCostGain) + dCostGain*dCost;
-    } else {
-      avgdCost = dCost;
-    }
-  } else {
-    avgCost = cost;
-  }
 }

@@ -23,14 +23,13 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	VectorFloat ap;
 	ap.x = a.x / 1670.03;
 	ap.y = a.y / 1670.03;
-	ap.z = -a.z / 1670.03;
-  float deg = PI/4;
-	t[0] = abs(atan(ap.z / ap.y)) - deg;
-	t[1] = abs(atan(ap.x / ap.z)) - deg;
+	ap.z = a.z / 1670.03;
+	t[0] = abs(atan(ap.x / ap.z));
+	t[1] = abs(atan(ap.y / ap.z));
 
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
-	BLA::Matrix<7> aPriori = X + (getA() * X + getB() * U) * dt;
+	BLA::Matrix<6> aPriori = X + (getA() * X + getB() * U) * dt;
 
 	// State estimation
 	float prioriGain = 0.05f; // turn up to prioritize prediction
@@ -43,7 +42,7 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 
   float spCorrectRate = 10.0;
   float maxAngle = 0.1;
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 2; i++) {
     spCorrect[i] -= U(i) * spCorrectRate * dt;
     spCorrect[i] = constrain(spCorrect[i], -maxAngle, maxAngle); // Stop windup on the anti windup. Sheeesh
 	}
@@ -53,9 +52,9 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	X = Y; // Sadge
 }
 
-void Cubic::signY(BLA::Matrix<7> aPriori) // We measure speed not velocity so we must add a sign
+void Cubic::signY(BLA::Matrix<6> aPriori) // We measure speed not velocity so we must add a sign
 {
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 2; i++) {
 		if (aPriori(4 + i) < 0 && motors[i].rps < 100) {
 			Y(4 + i) = -Y(4 + i);
 		}
@@ -64,50 +63,46 @@ void Cubic::signY(BLA::Matrix<7> aPriori) // We measure speed not velocity so we
 
 void Cubic::measureY(float t[3], VectorInt16 td)
 {
-	Y = { t[0], t[1], td.x / 7509.87263606, td.y / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps };
+	Y = { t[0], t[1], td.x / 7509.87263606, td.y / 7509.87263606, motors[0].rps, motors[1].rps };
 }
 
 void Cubic::calculateU(float dt)
 {
-	BLA::Matrix<3> pid = { 0.0, 0.0, 0.0 };
-	for (int i = 0; i < 3; i++) {
+	BLA::Matrix<2> pid = { 0.0, 0.0 };
+	for (int i = 0; i < 2; i++) {
     float err = X(i)-spCorrect[i];
-		pid(i) = (err)*pidw[0] + (X(3 + i)) * pidw[2] - X(6 + i) * pidw[3];
+		pid(i) = (err)*pidw[0] + (X(2 + i)) * pidw[2] - X(4 + i) * pidw[3];
 	}
 	float oldGain = 0.00f;
 	float newGain = 1.0f - oldGain; // Don't think ill need this hopefully the optimizer does its job :)
-	U = (pid * newGain + U * oldGain) / 10.0;
+	U = pid * newGain + U * oldGain;
 }
 
-BLA::Matrix<7, 7> Cubic::getA()
+BLA::Matrix<6, 6> Cubic::getA()
 {
 	float x = mass * 9.81 * l / (ix * 3); // X Gravity
 	float y = mass * 9.81 * l / (iy * 3); // Y Gravity
-	float z = mass * 9.81 * l / (iz * 3); // Z Gravity // TODO
 	return { 
-  0, 0, 1, 0, 0, 0, 0,
-	0, 0, 0, 1, 0, 0, 0,
-	x, 0, 0, 0, 0, 0, 0,
-	0, y, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0};
+  0, 0, 1, 0, 0, 0,
+	0, 0, 0, 1, 0, 0,
+	x, 0, 0, 0, 0, 0,
+	0, y, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0};
 }
 
-BLA::Matrix<7, 3> Cubic::getB()
+BLA::Matrix<6, 2> Cubic::getB()
 {
 	float w = 1 / iw;	 // Wheel acceleration
 	float x = -1 / ix; // X Acceleration
 	float y = -1 / iy; // Y Acceleration
-	float z = -1 / iz; // Z Acceleration
 	return { 
-		0, 0, 0,
-		0, 0, 0,
-		x, 0, 0,
-		0, y, 0,
-		w, 0, 0,
-		0, w, 0,
-		0, 0, w };
+		0, 0,
+		0, 0,
+		x, 0,
+		0, y,
+		w, 0,
+		0, w };
 }
 
 void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
@@ -115,11 +110,10 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 
 	calculateX(a, td, dt); // Kaaaaaaal?
 	calculateU(dt);
-//  getCost(dt);
 	printState();
-	motors[0].setTorque(U(0), X(6)); // X
+	motors[0].setTorque(U(0), X(6)); // X //TODO
 	motors[1].setTorque(U(1), X(7)); // Y
-	motors[2].setTorque(U(2), X(8)); // Z
+//	motors[2].setTorque(U(2), X(8)); // Z
 }
 
 void Cubic::printState()
@@ -144,35 +138,7 @@ bool Cubic::stop() {
   // stop all motors
   bool cont = false;
   for (int i = 0; i < 3; i++) {
-    cont = cont || motors[i].stop(X(i+6));
+    cont = cont || motors[i].stop(X(i+4));
   }
   return cont;
-}
-
-// Gradient Descent
-void Cubic::getCost(float dt) {
-  // Try and determine the cost QUICKLY to allow for gradient descent
-  cost = 0;
-  
-  float stateK[3] = {1.0, 0.25, 0.025};
-  cost += abs(X(1) * stateK[0]) + abs(X(4) * stateK[1]) + abs(X(7) * stateK[1]);  
-  
-  float inputK = 2.0;
-  cost += abs(U(1) * inputK);
-
-  if (avgCost) {
-    float costGain = 0.05;
-    dCost = -avgCost;
-    avgCost = avgCost * (1-costGain) + costGain*cost;
-    dCost += avgCost; // Difference
-    dCost /= dt;
-    if (avgdCost) {
-      float dCostGain = 0.1;
-      avgdCost = avgdCost * (1-dCostGain) + dCostGain*dCost;
-    } else {
-      avgdCost = dCost;
-    }
-  } else {
-    avgCost = cost;
-  }
 }

@@ -7,20 +7,19 @@ using namespace BLA;
 class Cubic // 462 bytes
 {
 	public:
-	BLA::Matrix<9> X;																		// 36 bytes
-	BLA::Matrix<9> Y;																		// 36 bytes
+	BLA::Matrix<7> X;																		// 36 bytes
+	BLA::Matrix<7> Y;																		// 36 bytes
 	BLA::Matrix<3> U;																		// 12 bytes
 	Motor motors[3] = { Motor(2), Motor(1), Motor(0) }; // 54 bytes
-	float spCorrect[3] = { 0.0, 0.0, 0.0 };
+	float spCorrect[3] = { 0.0, 0.0 };
   float pidw[3] = {1.0, 6.0, 0.0001 };
-	BLA::Matrix<3, 9> getK();
-	void measureY(float t[3], VectorInt16 td);
+	void measureY(float t[2], VectorInt16 td);
   bool stop();
 	void calculateU(float dt);
-	BLA::Matrix<9, 9> getA();
-	BLA::Matrix<9, 3> getB();
+	BLA::Matrix<7, 7> getA();
+	BLA::Matrix<7, 3> getB();
 	void calculateX(VectorInt16 a, VectorInt16 td, float dt);
-	void signY(BLA::Matrix<9> aPriori);
+	void signY(BLA::Matrix<7> aPriori);
 	void run(VectorInt16 a, VectorInt16 td, float dt);
 	void printState();
 

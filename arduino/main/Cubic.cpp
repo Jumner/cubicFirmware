@@ -19,24 +19,23 @@ Cubic::Cubic()
 }
 void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 {
-	float t[3]; // theta
+	float t[2]; // theta
 	VectorFloat ap;
 	ap.x = a.x / 1670.03;
 	ap.y = a.y / 1670.03;
 	ap.z = -a.z / 1670.03;
   float deg = PI/4;
-	t[0] = abs(atan(ap.z / ap.y)) - deg + 0.04;
-	t[1] = abs(atan(ap.x / ap.z)) - deg - 0.05;
-	t[2] = abs(atan(ap.y / ap.x)) - deg - 0.02;
+	t[0] = abs(atan(ap.z / ap.y)) - deg;
+	t[1] = abs(atan(ap.x / ap.z)) - deg;
 
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
-	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
+	BLA::Matrix<7> aPriori = X + (getA() * X + getB() * U) * dt;
 
 	// State estimation
 	float prioriGain = 0.05f; // turn up to prioritize prediction
 	float yGain = 1.0 - prioriGain;
-  for (int i = 0; i < 3; i ++) {
+  for (int i = 0; i < 2; i ++) {
     t[i] *= yGain;
     t[i] += aPriori(i) * prioriGain; // Only affects theta (only noisy val)
   }
@@ -54,18 +53,18 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	X = Y; // Sadge
 }
 
-void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we must add a sign
+void Cubic::signY(BLA::Matrix<7> aPriori) // We measure speed not velocity so we must add a sign
 {
 	for (int i = 0; i < 3; i++) {
-		if (aPriori(6 + i) < 0 && motors[i].rps < 100) {
-			Y(6 + i) = -Y(6 + i);
+		if (aPriori(4 + i) < 0 && motors[i].rps < 100) {
+			Y(4 + i) = -Y(4 + i);
 		}
 	}
 }
 
 void Cubic::measureY(float t[3], VectorInt16 td)
 {
-	Y = { t[0], t[1], t[2], td.x / 7509.87263606, td.y / 7509.87263606, -td.z / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps };
+	Y = { t[0], t[1], td.x / 7509.87263606, td.y / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps };
 }
 
 void Cubic::calculateU(float dt)
@@ -80,34 +79,32 @@ void Cubic::calculateU(float dt)
 	U = (pid * newGain + U * oldGain) / 10.0;
 }
 
-BLA::Matrix<9, 9> Cubic::getA()
+BLA::Matrix<7, 7> Cubic::getA()
 {
 	float x = mass * 9.81 * l / (ix * 3); // X Gravity
 	float y = mass * 9.81 * l / (iy * 3); // Y Gravity
-	float z = mass * 9.81 * l / (iz * 3); // Z Gravity
-	return { 0, 0, 0, 1, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 1, 0, 0, 0,
-		x, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, y, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, z, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	float z = mass * 9.81 * l / (iz * 3); // Z Gravity // TODO
+	return { 
+  0, 0, 1, 0, 0, 0, 0,
+	0, 0, 0, 1, 0, 0, 0,
+	x, 0, 0, 0, 0, 0, 0,
+	0, y, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0};
 }
 
-BLA::Matrix<9, 3> Cubic::getB()
+BLA::Matrix<7, 3> Cubic::getB()
 {
 	float w = 1 / iw;	 // Wheel acceleration
 	float x = -1 / ix; // X Acceleration
 	float y = -1 / iy; // Y Acceleration
 	float z = -1 / iz; // Z Acceleration
-	return { 0, 0, 0,
+	return { 
 		0, 0, 0,
 		0, 0, 0,
 		x, 0, 0,
 		0, y, 0,
-		0, 0, z,
 		w, 0, 0,
 		0, w, 0,
 		0, 0, w };
@@ -128,8 +125,7 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 void Cubic::printState()
 {
   Serial << "t0: " << X(0) << ',';
-  Serial << "t1: " << X(1) << ',';
-  Serial << "t2: " << X(2) << '\n';
+  Serial << "t2: " << X(1) << '\n';
 //	Serial << "Angle:" << X(1) << ',';
 //	Serial << "Rate:" << X(4) << ',';
 //	float rate = X(7) / 40.0;

@@ -22,6 +22,7 @@ If the time margin is too small:
 
 Here is a simple block diagram to show the system with feedforward
 ``` mermaid
+stateDiagram-v2
     direction LR
     
     kalman: State Estimator

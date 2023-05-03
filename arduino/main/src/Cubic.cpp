@@ -134,6 +134,8 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 //	motors[2].setTorque(U(2), X(8)); // Z
 }
 
+void Cubic::printState()
+{
 //	Serial << "Angle:" << X(1) << ',';
 //	Serial << "Rate:" << X(4) << ',';
 //	float rate = X(7) / 40.0;
@@ -143,3 +145,14 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 //	Serial << "Output:" << U(1) << ',';
 //  float pidPrint = pidw[2] * 10.0;
 //  Serial << "kd: " << pidPrint << '\n';
+}
+
+bool Cubic::stop() {
+  // stop all motors
+  bool cont = false;
+  for (int i = 0; i < 3; i++) {
+//  int i = 1; // 2d
+    cont = cont || motors[i].stop(X(i+6));
+  }
+  return cont;
+}

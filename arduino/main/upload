@@ -1,0 +1,1 @@
+sudo pio run -t upload && cd logs && sudo pio device monitor -f default -f log2file -b 38400

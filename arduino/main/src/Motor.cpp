@@ -2,7 +2,7 @@
 #include <Arduino.h>
 Motor::Motor(int n)
 {
-  tach = n == 2 ? 8 : 2 + n;
+  tach = n == 2 ? 8 : 3 + n;
   cw = 5 + n;
   pwm = 9 + n;
 
@@ -45,13 +45,12 @@ void Motor::setPwm(int val, bool dir)
 
 bool Motor::stop(float vel) {
   // Stop the motor
-  if (rps > 5) {
-     setTorque(-vel*0.00001, vel);
-  } else {
+  if (rps < 5) {
     setPwm(255,false);
     return false;  
   }
-  return true;
+  setTorque(-vel*0.00001, vel);
+  return true; // Not done, keep calling
 }
 
 void Motor::setTorque(double t, double vel)

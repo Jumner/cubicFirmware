@@ -40,10 +40,8 @@ void setup() {
   Wire.setWireTimeout(3000, true); // timeout value in uSec (fixes hang issue)
   Serial.begin(38400);
   delay(1000);
-  Serial.println("Starting");
   imu.initialize();
 
-  pinMode(2, INPUT); // 6050
   pinMode(8, INPUT); // tach 0
   pinMode(3, INPUT); // tach 1
   pinMode(4, INPUT); // tach 2
@@ -54,8 +52,6 @@ void setup() {
   imu.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
   imu.setFullScaleAccelRange(MPU6050_ACCEL_FS_2);
 
-  if (imu.dmpInitialize() != 0)
-    safe("2");
   imu.setXAccelOffset(806);
   imu.setYAccelOffset(572);
   imu.setZAccelOffset(5510);
@@ -63,31 +59,19 @@ void setup() {
   imu.setYGyroOffset(11);
   imu.setZGyroOffset(-5);
 
-  // imu.CalibrateAccel();
-  // imu.CalibrateGyro();
-  // imu.PrintActiveOffsets();
-  // safe("done calibrate");
-
-  imu.setDMPEnabled(true);
-
   // Attach tachometer interrupts
   // attachInterrupt(digitalPinToInterrupt(2), dmpDataReady, RISING); // 6050
-  attachPCINT(digitalPinToPCINT(cube.motors[0].tach), int2,
-              RISING); // Pin 2 is mpu interrupt
+  attachPCINT(digitalPinToPCINT(cube.motors[0].tach), int2, RISING); // Pin 2 is mpu interrupt
   attachPCINT(digitalPinToPCINT(cube.motors[1].tach), int1, RISING);
   attachPCINT(digitalPinToPCINT(cube.motors[2].tach), int0, RISING);
 
-  mpuIntStatus = imu.getIntStatus();
-
-  packetSize = imu.dmpGetFIFOPacketSize();
-  Serial.println("done");
   Serial.println("time,motor0,motor1,motor2,x,y,z,wx,wy,wz,ux,uy,uz");
   delay(1000);
   time = micros();
 }
 
 void log() {
-  Serial.print(time);
+  Serial.print(((double)time/1000000)-2);
   for (int i = 0; i < 9; i++) {
     Serial.print(",");
     Serial.print(cube.X(i));
@@ -96,10 +80,11 @@ void log() {
     Serial.print(",");
     Serial.print(cube.U(i));
   }
+  Serial.println();
 }
 
 void loop() {
-  safe("not gonna do stuff");
+  // safe("not gonna do stuff");
   imu.getAcceleration(&accel.x, &accel.y, &accel.z);
   imu.getRotation(&gyro.x, &gyro.y, &gyro.z);
   double dt = (micros() - time) / (1000000.0); // In secs

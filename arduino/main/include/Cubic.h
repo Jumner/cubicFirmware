@@ -15,14 +15,12 @@ class Cubic // 462 bytes
   float pidw[4] = {1.0, 0.0, 6.0, 0.0001 };
 	float integral[3] = { 0.0, 0.0, 0.0 };
 	void measureY(float t[3], VectorInt16 td);
-  bool stop();
 	void calculateU(float dt);
 	BLA::Matrix<9, 9> getA();
 	BLA::Matrix<9, 3> getB();
 	void calculateX(VectorInt16 a, VectorInt16 td, float dt);
 	void signY(BLA::Matrix<9> aPriori);
 	void run(VectorInt16 a, VectorInt16 td, float dt);
-	void printState();
 
 	Cubic();
 	~Cubic();

@@ -27,44 +27,25 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	VectorFloat ap;
 	ap.x = a.x / 1670.03;
 	ap.y = a.y / 1670.03;
-	ap.z = -a.z / 1670.03;
-	// Serial.println(t);
-  float deg = PI/4;
-	t[0] = abs(atan(ap.z / ap.y)) - deg + 0.04;
-	t[1] = abs(atan(ap.x / ap.z)) - deg - 0.05;
-	t[2] = abs(atan(ap.y / ap.x)) - deg - 0.02;
-
+	ap.z = a.z / 1670.03;
+	t[0] = atan(ap.x / ap.z);
+	t[1] = atan(ap.y / ap.z);
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
 	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
-
+	t[2] = X(2); // Twist is not observable
+	measureY(t, td); // Measure the output/state (full state feedback (kinda?))
+	signY(aPriori);
 	// State estimation
 	float prioriGain = 0.05f; // turn up to prioritize prediction
 	float yGain = 1.0 - prioriGain;
-	t[0] *= yGain;
-	t[0] += aPriori(0) * prioriGain;
-	t[1] *= yGain;
-	t[1] += aPriori(1) * prioriGain;
-	t[2] *= yGain;
-	t[2] += aPriori(2) * prioriGain;
-
-  float spCorrectRate = 10.0;
-  float maxAngle = 0.1;
-	for (int i = 0; i < 3; i++) {
-    spCorrect[i] -= U(i) * spCorrectRate * dt;
-    spCorrect[i] = constrain(spCorrect[i], -maxAngle, maxAngle);
-	}
-
-	measureY(t, td); // Measure the output/state (full state feedback (kinda?))
-	// BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
-	signY(aPriori);
-	X = Y; // Sadge
+	X = Y * yGain + aPriori * prioriGain; // Sadge no Kaaal
 }
 
 void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we must add a sign
 {
 	for (int i = 0; i < 3; i++) {
-		if (aPriori(6 + i) < 0 && motors[i].rps < 100) {
+		if (aPriori(6 + i) < 0) {
 			Y(6 + i) = -Y(6 + i);
 		}
 	}
@@ -134,8 +115,6 @@ void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 //	motors[2].setTorque(U(2), X(8)); // Z
 }
 
-void Cubic::printState()
-{
 //	Serial << "Angle:" << X(1) << ',';
 //	Serial << "Rate:" << X(4) << ',';
 //	float rate = X(7) / 40.0;
@@ -145,14 +124,3 @@ void Cubic::printState()
 //	Serial << "Output:" << U(1) << ',';
 //  float pidPrint = pidw[2] * 10.0;
 //  Serial << "kd: " << pidPrint << '\n';
-}
-
-bool Cubic::stop() {
-  // stop all motors
-  bool cont = false;
-  for (int i = 0; i < 3; i++) {
-//  int i = 1; // 2d
-    cont = cont || motors[i].stop(X(i+6));
-  }
-  return cont;
-}

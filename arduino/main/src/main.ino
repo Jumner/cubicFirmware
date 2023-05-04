@@ -19,16 +19,9 @@ Cubic cube = Cubic();
 unsigned long time;
 MPU6050 imu;
 
-// MPU control/status vars
-uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
-uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
-uint8_t fifoBuffer[64]; // FIFO storage buffer
-
 // orientation/motion vars
-Quaternion q;      // [w, x, y, z]         quaternion container
 VectorInt16 gyro;  // [x, y, z]
 VectorInt16 accel; // [x, y, z]
-float euler[3];    // [psi, theta, phi]    Euler angle container
 
 volatile bool mpuInterrupt =
     false; // indicates whether MPU interrupt pin has gone high
@@ -60,12 +53,11 @@ void setup() {
   imu.setZGyroOffset(-5);
 
   // Attach tachometer interrupts
-  // attachInterrupt(digitalPinToInterrupt(2), dmpDataReady, RISING); // 6050
   attachPCINT(digitalPinToPCINT(cube.motors[0].tach), int2, RISING); // Pin 2 is mpu interrupt
   attachPCINT(digitalPinToPCINT(cube.motors[1].tach), int1, RISING);
   attachPCINT(digitalPinToPCINT(cube.motors[2].tach), int0, RISING);
 
-  Serial.println("time,motor0,motor1,motor2,x,y,z,wx,wy,wz,ux,uy,uz");
+  Serial.println("time,x,y,z,wx,wy,wz,motor0,motor1,motor2,ux,uy,uz");
   delay(1000);
   time = micros();
 }

@@ -57,7 +57,7 @@ void setup() {
   attachPCINT(digitalPinToPCINT(cube.motors[1].tach), int1, RISING);
   attachPCINT(digitalPinToPCINT(cube.motors[2].tach), int0, RISING);
 
-  Serial.println("time,x,y,z,wx,wy,wz,motor0,motor1,motor2,ux,uy,uz");
+  Serial.println("time,x,y,z,wx,wy,wz,m0,m1,m2,u0,u1,u2");
   delay(1000);
   time = micros();
 }
@@ -85,7 +85,7 @@ void loop() {
   for (int i = 0; i < 3; i++) {
     if (cube.motors[i].rps > 90) {
       safe("Motor overspeed");
-    } else if (abs(cube.X(i)) > 0.6) {
+    } else if (i != 2 && abs(cube.X(i)) > 0.5) { // 3rd is twist which is fine
       safe("Fell over");
     }
   }

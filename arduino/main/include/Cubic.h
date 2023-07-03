@@ -11,8 +11,8 @@ class Cubic // 462 bytes
 	BLA::Matrix<9> Y;																		// 36 bytes
 	BLA::Matrix<3> U;																		// 12 bytes
 	Motor motors[3] = { Motor(2), Motor(1), Motor(0) }; // 54 bytes
-	float spCorrect[3] = { 0.0, 0.0, 0.0 };
-  float pidw[3] = {1.0, 0.0, 0.0 }; // 0.0001
+	float spCorrect[2] = { 0.0, 0.0 };
+  float pidw[3] = {6.902, 0.4584, 1.187 }; // 0.0001
 	float integral[3] = { 0.0, 0.0 };
 	void measureY(float t[3], VectorInt16 td);
 	void calculateU(float dt);

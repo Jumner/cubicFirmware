@@ -85,7 +85,7 @@ void loop() {
   for (int i = 0; i < 3; i++) {
     if (cube.motors[i].rps > 90) {
       safe("Motor overspeed");
-    } else if (i != 2 && abs(cube.X(i)) > 0.5) { // 3rd is twist which is fine
+    } else if (i != 2 && abs(cube.X(i)) > 0.25) { // 3rd is twist which is fine
       safe("Fell over");
     }
   }

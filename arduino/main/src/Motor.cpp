@@ -45,11 +45,10 @@ void Motor::setPwm(int val, bool dir)
 
 bool Motor::stop(float vel) {
   // Stop the motor
-  if (rps < 5) {
-    setPwm(255,false);
+  setPwm(255,false);
+  if (rps < 10) {
     return false;  
   }
-  setTorque(-vel*0.00001, vel);
   return true; // Not done, keep calling
 }
 

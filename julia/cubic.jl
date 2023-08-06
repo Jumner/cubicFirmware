@@ -88,21 +88,65 @@ spErr = 0
 # sp = 0.0015835614565139875
 # Cost = 0.7363852806102484
 
-kp = 22.317029661859724
-kd = 29.429799217979152
-kw = 0.005046194164776092
-sp = 0.001706491109572526
+# kp = 22.317029661859724
+# kd = 29.429799217979152
+# kw = 0.005046194164776092
+# sp = 0.001706491109572526
 # Cost = 0.6984172727932504
+
+# kp = 16.564849686540338
+# kd = 16.42698625214316
+# kw = 0.004515562930880744
+# sp = 0.0008895676461311288
+# Cost = 2.4456049571826513
+
+# kp = 25.45146273201084
+# kd = 15.484942051806858
+# kw = 0.0043635650947004175
+# sp = 0.0013297338867193924
+# Cost = 1.41147844739581
+
+# kp = 15.398539275046852
+# kd = 11.576751347163787
+# kw = 0.004295198472238802
+# sp = -0.00045934980222573843
+# Cost = 0.7213355364569924
+
+kp = 16.524391599478232
+kd = 15.836384061261285
+kw = 0.004510714990687427
+sp = 0.000866997945294915
+
+# kp = 5.680027343459856
+# kd = 5.174699842994684
+# kw = 0.00428977310262684
+# sp = 0.0007488078481782175
+
+# kp = 6.374398250567869
+# kd = 6.877099164695932
+# kw = 0.004203415590498105
+# sp = 0.0006934966326738897
+# Cost = 2.749865243898264
 ws = 1000 # Wheel scale
+lastU = 0
+lastTime = 0
 function f(dθ, θ, p, t)
     
+    println(t)
     w = θ[3] * ws
-    torque = 0.0625 - 0.000743 * w - 0.00000348 * w^2 + 0.0000000429 * w^3
-    # Feed forward
-    grav = m * g * L * sin(θ[1] + spErr - θ[4]) # Torque due to gravity
-    # Control
-    u = - kp * (θ[1] + spErr - w*kw - θ[4]) - kd * θ[2] - grav # 0.4584
-    u = max(min(u, max(0, torque)), -torque)
+    if t - lastTime >= 0
+        torque = 0.0625 - 0.000743 * w - 0.00000348 * w^2 + 0.0000000429 * w^3
+        # Feed forward
+        grav = m * g * L * sin(θ[1] + spErr - θ[4]) # Torque due to gravity
+        # Control
+        u = - kp * (θ[1] + spErr - w*kw - θ[4]) - kd * θ[2] - grav # 0.4584
+        u = max(min(u, max(0, torque)), -torque)
+        global lastU = u
+        global lastTime = t
+    else
+        # println(t - lastTime)
+        u = lastU
+    end
     dθ[1] = θ[2]
     dθ[2] = (u + m * g * L * sin(θ[1])) / I
     dθ[3] = u / (Iw * ws)
@@ -111,10 +155,10 @@ end
 
 # Initial Conditions
 # x0 = [0.0, 0.0, 50.0, 0.01]  # Initial state ([θ, θ_dot])
-x0 = [0.0, 0.0, 0.0, 0.0]  # Initial state ([θ, θ_dot])
+x0 = [0.01, 0.0, 0.0, 0.0]  # Initial state ([θ, θ_dot])
 
 # Time Span
-tspan = (0.0, 10.0)  # Simulation time span
+tspan = (0.0, 60.0)  # Simulation time span
 
 
 # Define the ODE Problem
@@ -126,6 +170,8 @@ spErrPrec = 9
 
 function cost()
     global spErr = 0.02
+    global lastU = 0
+    global lastTime = 0
     global sol = solve(prob)
     c = 0.0
     weights = [6922.24, 364.81, 0.00117649, 571.21]

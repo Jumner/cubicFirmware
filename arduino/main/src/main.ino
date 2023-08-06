@@ -23,9 +23,6 @@ MPU6050 imu;
 VectorInt16 gyro;  // [x, y, z]
 VectorInt16 accel; // [x, y, z]
 
-volatile bool mpuInterrupt =
-    false; // indicates whether MPU interrupt pin has gone high
-void dmpDataReady() { mpuInterrupt = true; }
 void setup() {
   Wire.begin();
   Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having
@@ -66,11 +63,11 @@ void log() {
   Serial.print(((double)time/1000000)-2);
   for (int i = 0; i < 9; i++) {
     Serial.print(",");
-    Serial.print(cube.X(i));
+    Serial.print(cube.X(i), 6);
   }
   for (int i = 0; i < 3; i++) {
     Serial.print(",");
-    Serial.print(cube.U(i));
+    Serial.print(cube.U(i), 6);
   }
   Serial.println();
 }
@@ -82,14 +79,14 @@ void loop() {
   double dt = (micros() - time) / (1000000.0); // In secs
   time = micros();
   cube.run(accel, gyro, dt); // "It just works"
+  log();
   for (int i = 0; i < 3; i++) {
-    if (cube.motors[i].rps > 90) {
+    if (cube.motors[i].rps > 40) { // 90
       safe("Motor overspeed");
     } else if (i != 2 && abs(cube.X(i)) > 0.25) { // 3rd is twist which is fine
       safe("Fell over");
     }
   }
-  log();
 }
 
 void int0(void) { cube.motors[0].interrupt(); }
@@ -100,11 +97,15 @@ void safe(String s) { // Put the chip into a safe mode is something
                       // unrecoverable goes wrong
   Serial.print("Fatal Err: ");
   Serial.println(s);
-  while (cube.stop()) {
-    double dt = (micros() - time) / (1000000.0); // In secs
-    time = micros();
-    cube.calculateX(accel, gyro, dt);
+  while (true) {
+    cube.motors[0].setPwm(255,false);
+    cube.motors[1].setPwm(255,false);
+    cube.motors[2].setPwm(255,false);
+    // double dt = (micros() - time) / (1000000.0); // In secs
+    // time = micros();
+    // cube.calculateX(accel, gyro, dt);
   }
+  Serial.println("Cubic Safed");
   while (true) {
     delay(10000);
   }

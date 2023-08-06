@@ -9,6 +9,15 @@
 #define iy 0.02335				 // Inertia y
 #define iz 0.004126				 // Inertia z
 #define iw 0.00025			 // Wheel inertia (kg*m^2)
+#define kp 6.374398250567869
+#define kd 6.877099164695932
+#define kw 0.004203415590498105
+#define sp 0.0006934966326738897
+// #define kp 0.0
+// #define kd 0.0
+// #define kw 0.0
+// #define sp 0.0
+
 
 using namespace BLA;
 Cubic::Cubic()
@@ -23,20 +32,24 @@ Cubic::~Cubic()
 
 void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 {
+	// Calculate A priori (the predicted state based on model)
+	// Note that this is the same as C * aPriori bc we using full state feedback
+	// BLA::Matrix<9> aPriori = X + (getA() * X) * dt;
+	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
+
 	float t[3]; // theta
 	t[0] = atan((double)a.x / a.z);
 	t[1] = atan((double)a.y / a.z);
-	// Calculate A priori (the predicted state based on model)
-	// Note that this is the same as C * aPriori bc we using full state feedback
-	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 	t[2] = aPriori(2); // Twist is not directly observable
 	measureY(t, td); // Measure the output/state (full state feedback (kinda?))
 	signY(aPriori); // Wheel speed is measured so sign it based on the apriori
 	// State estimation
-	// float prioriGain = 0.05f; // turn up to prioritize prediction
-	float prioriGain = 0.5f; // Disable state estimation
-	float yGain = 1.0 - prioriGain;
-	X = Y * yGain + aPriori * prioriGain; // Sadge no Kaaal
+	// float prioriGain = 0.5f; // turn up to prioritize prediction
+	// float yGain = 1.0 - prioriGain;
+	BLA::Matrix<9,1> prioriGain = {0.95, 0.95, 0.0, 0.2, 0.2, 0.2, 0.1, 0.1, 0.1};
+	for(int i = 0; i < 9; i ++) {
+		X(i) = Y(i) + prioriGain(i) * (aPriori(i) - Y(i)); // Sadge no Kaaal
+	}
 }
 
 void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we must add a sign
@@ -57,33 +70,42 @@ void Cubic::calculateU(float dt)
 {
 	BLA::Matrix<2> pid = { 0.0, 0.0 };
 	BLA::Matrix<6> state = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // State used for control x_angle,y_angle,x_dot,y_dot,x_wheelspeed,y_wheelspeed
-
+	BLA::Matrix<2> gravity = { 0.0, 0.0 };
+	
 	BLA::Matrix<2,3> wheelTransform = {
     -sqrt(6)/6, sqrt(6)/3, -sqrt(6)/6,
     sqrt(2)/2 , 0.0      , -sqrt(2)/2
 	};
 
-	BLA::Matrix<2> wheels = wheelTransform * {X(6), X(7), X(8)}; // Decompose the three wheel velocities into its X and Y components
+	BLA::Matrix<3> wheel3 = {X(6), X(7), X(8)};
+	BLA::Matrix<2> wheels = wheelTransform * wheel3; // Decompose the three wheel velocities into its X and Y components
 
 	for (int i = 0; i < 2; i++) {
 		state(i)   = X(i);      // X/Y angle
 		state(i+2) = X(i + 3);  // X/Y dot
 		state(i+4) = wheels(i); // X/Y Wheel
 
-		// The control strategy here is to nudge your error when the wheels are high velocity. Then offset it by a compounding term from wheel speed.
-		// This can probably be simplified with feed forward control but ill need to test this and see how close it is before I decide if thats a worthy use of my time
-		pid(i) = - 6.902 * (state(i) - state(i + 4) * 0.0001 - spCorrect[i])
-						 - 0.4584 * state(i + 2)
-		spCorrect[i] += state(i + 4) * 0.00003; // Move the set point correct
+		// X/Y Control
+		// First we feed forward gravity to linearize the control response
+		gravity(i) = mass * 9.81 * l * sin(state(i) - spCorrect[i]);
+
+		// We nudge error dependant on wheel speed (essentially moving the setpoint to slow wheels)
+		// We also nudge it by sp correct which accounts for any tilt in the sensor in ~10 sec
+		// We then counter velocity with the d term
+
+		pid(i) = - kp * (state(i) - kw * state(i+4) - spCorrect[i]) - kd * state(i+2) - gravity(i);
+		// Use the wheel speed to infer sensor tilt
+		spCorrect[i] += state(i + 4) * sp * dt; // Move the set point correct
 	}
 	// Transform x,y torque to motor torques
 	// Note my convention here (this will haunt me) x/0 is the rotation around the Y axis. y/1 is the rotation around the X axis
 	BLA::Matrix<3,2> transform = {
-		 -sqrt(6)/6, sqrt(2)/2, // sqrt(3)/3
-		 sqrt(6)/3 ,  0.0     ,
+		 -sqrt(6)/6, sqrt(2)/2,
+		 sqrt(6)/3 ,  0.0      ,
 		 -sqrt(6)/6, -sqrt(2)/2 
 	};
-	U = transform * pid; // Apply transform to required torques
+	float uGain = 0.75; // Reduce the impact of high frequency oscillations in the motors (they kinda click)
+	U = U * uGain + transform * pid * (1-uGain); // Apply transform to get required torques
 	// Handle spinup, we want the average wheel velocity to always be zero. U is calculated to not change the average wheel velocity
 	double sum = 0;
 	for(int i = 6; i < 9; i ++) {
@@ -126,21 +148,15 @@ BLA::Matrix<9, 3> Cubic::getB()
 		w           , 0          , 0           ,
 		0           , w          , 0           ,
 		0           , 0          , w};
-
-		 // -sqrt(6)/6, sqrt(2)/2,  sqrt(3)/3
-		 // sqrt(6)/3,  0.0,        sqrt(3)/3
-		 // -sqrt(6)/6, -sqrt(2)/2, sqrt(3)/3
-	
 }
 
 void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
 {
-
 	calculateX(a, td, dt); // Kaaaaaaal?
 	calculateU(dt);
-	motors[0].setTorque(U(0), X(6)); // X
-	motors[1].setTorque(U(1), X(7)); // Y
-	motors[2].setTorque(U(2), X(8)); // Z
+	motors[0].setTorque(U(0), X(6)); // Left
+	motors[1].setTorque(U(1), X(7)); // Back
+	motors[2].setTorque(U(2), X(8)); // Right
 }
 
 bool Cubic::stop() {

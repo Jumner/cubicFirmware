@@ -15,5 +15,6 @@ public:
   void setTorque(double t, double vel);
   static int maxTorque(double vel);
   bool stop(float vel);
+  bool currentDir; // Current Direction (To minimize)
   double rps;    // 8 bytes
 };

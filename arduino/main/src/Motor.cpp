@@ -11,7 +11,8 @@ Motor::Motor(int n)
   pinMode(pwm, OUTPUT);
 
   // Set default values
-  digitalWrite(cw, LOW);
+  currentDir = LOW;
+  digitalWrite(cw, currentDir);
   analogWrite(pwm, 255); // Off
 }
 
@@ -23,15 +24,11 @@ void Motor::interrupt(void)
 
 void Motor::setPwm(int val, bool dir)
 {
-  if (dir)
-  {
-    digitalWrite(cw, HIGH);
+  if (dir != currentDir) { // Changed Directions
+    digitalWrite(dir); // Write new direction (HIGH == True == 0x1, LOW == False == 0x0)
+    currentDir = dir; // Update current dir
   }
-  else
-  {
-    digitalWrite(cw, LOW);
-  }
-  analogWrite(pwm, val);
+  analogWrite(pwm, val); // Write pwm value
 }
 
 bool Motor::stop(float vel) {

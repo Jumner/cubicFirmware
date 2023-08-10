@@ -6,7 +6,7 @@ private:
   unsigned int cw : 4;       // 0.5 bytes
   unsigned int pwm : 8;      // 1 byte
   unsigned long int oldTime; // 8 bytes
-  bool currentDir; // Current Direction (To minimize)
+  bool currentDir;           // Current Direction (To minimize)
 
 public:
   unsigned int tach : 4; // 0.5 bytes (Exposed to remove interrupt headache)
@@ -16,5 +16,5 @@ public:
   void setTorque(double t, double vel);
   static int maxTorque(double vel);
   bool stop(float vel);
-  double rps;    // 8 bytes
+  double rps; // 8 bytes
 };

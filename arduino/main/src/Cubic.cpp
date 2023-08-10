@@ -18,8 +18,6 @@
 // #define kw 0.0
 // #define sp 0.0
 
-
-using namespace BLA;
 Cubic::Cubic()
 {
 	// Set timers
@@ -37,7 +35,7 @@ void Cubic::calculateX(VectorInt16 td, float dt)
 	// Note Theta is not directly observed
 	measureY(aPriori, td); // Measure the output/state (full state feedback (kinda?))
 	// State estimation
-	BLA::Matrix<9,1> prioriGain = {0.0, 0.0, 0.0, 0.2, 0.2, 0.2, 0.1, 0.1, 0.1};
+	BLA::Matrix<9,1> prioriGain = {1.0, 1.0, 1.0, 0.2, 0.2, 0.2, 0.1, 0.1, 0.1};
 	for(int i = 0; i < 9; i ++) {
 		X(i) = Y(i) + prioriGain(i) * (aPriori(i) - Y(i)); // Sadge no Kaaal
 	}
@@ -100,7 +98,7 @@ void Cubic::calculateU(float dt)
 	for(int i = 6; i < 9; i ++) {
 		sum += X(i); // Sum wheel rates
 	}
-	Matrix<3> antiSpinup = { 1.0, 1.0, 1.0 };
+	BLA::Matrix<3> antiSpinup = { 1.0, 1.0, 1.0 };
 	antiSpinup *= sum * 0.0001; // Simple proportional controller, good performance doesn't matter we just want to avoid spinup
 	U -= antiSpinup; // Apply anti Spinup
 	// Limit max torque to improve apriori accuracy

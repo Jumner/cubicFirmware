@@ -1,5 +1,6 @@
 #include "Cubic.h"
 #include "Motor.h"
+#include "flags.h"
 #include "Wire.h"
 #include <BasicLinearAlgebra.h>
 #include <I2Cdev.h>
@@ -12,7 +13,6 @@ MPU6050 imu;
 
 // orientation/motion vars
 VectorInt16 gyro;  // [x, y, z]
-VectorInt16 accel; // [x, y, z]
 
 void setup() {
   Wire.begin();
@@ -28,7 +28,7 @@ void setup() {
   pinMode(4, INPUT); // tach 2
 
   if (!imu.testConnection())
-    safe("1");
+    safe("IMU");
 
   imu.setFullScaleGyroRange(MPU6050_GYRO_FS_250);
   imu.setFullScaleAccelRange(MPU6050_ACCEL_FS_2);
@@ -45,7 +45,9 @@ void setup() {
   attachPCINT(digitalPinToPCINT(cube.motors[1].tach), int1, RISING);
   attachPCINT(digitalPinToPCINT(cube.motors[2].tach), int0, RISING);
 
-  Serial.println("time,x,y,z,wx,wy,wz,m0,m1,m2,u0,u1,u2");
+  if(LOGGING){
+    Serial.println("time,x,y,z,wx,wy,wz,m0,m1,m2,u0,u1,u2");
+  }
   delay(1000);
   time = micros();
 }
@@ -65,14 +67,13 @@ void log() {
 
 void loop() {
   // safe("not gonna do stuff");
-  imu.getAcceleration(&accel.x, &accel.y, &accel.z);
   imu.getRotation(&gyro.x, &gyro.y, &gyro.z);
   double dt = (micros() - time) / (1000000.0); // In secs
   time = micros();
-  cube.run(accel, gyro, dt); // "It just works"
-  log();
+  cube.run(gyro, dt); // "It just works"
+  if(LOGGING) log(); 
   for (int i = 0; i < 3; i++) {
-    if (cube.motors[i].rps > 40) { // 90
+    if (cube.motors[i].rps > MAX_SPEED) { // 90
       safe("Motor overspeed");
     } else if (i != 2 && abs(cube.X(i)) > 0.25) { // 3rd is twist which is fine
       safe("Fell over");
@@ -94,7 +95,7 @@ void safe(String s) { // Put the chip into a safe mode is something
     cube.motors[2].setPwm(255,false);
     // double dt = (micros() - time) / (1000000.0); // In secs
     // time = micros();
-    // cube.calculateX(accel, gyro, dt);
+    // cube.calculateX(gyro, dt);
   }
   Serial.println("Cubic Safed");
   while (true) {

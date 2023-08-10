@@ -27,7 +27,7 @@ Cubic::Cubic()
 	TCCR2B = (TCCR2B & B11111000) | B00000001; // 11
 }
 
-void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
+void Cubic::calculateX(VectorInt16 td, float dt)
 {
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
@@ -147,9 +147,9 @@ BLA::Matrix<9, 3> Cubic::getB()
 		0           , 0          , w};
 }
 
-void Cubic::run(VectorInt16 a, VectorInt16 td, float dt)
+void Cubic::run(VectorInt16 td, float dt)
 {
-	calculateX(a, td, dt); // Kaaaaaaal?
+	calculateX(td, dt); // Kaaaaaaal?
 	calculateU(dt);
 	motors[0].setTorque(U(0), X(6)); // Left
 	motors[1].setTorque(U(1), X(7)); // Back

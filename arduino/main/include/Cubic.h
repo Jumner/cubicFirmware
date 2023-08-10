@@ -18,8 +18,8 @@ class Cubic // 462 bytes
 	bool stop();
 	BLA::Matrix<9, 9> getA();
 	BLA::Matrix<9, 3> getB();
-	void calculateX(VectorInt16 a, VectorInt16 td, float dt);
-	void run(VectorInt16 a, VectorInt16 td, float dt);
+	void calculateX(VectorInt16 td, float dt);
+	void run(VectorInt16 td, float dt);
 
 	Cubic();
 };

@@ -37,33 +37,25 @@ void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
 	// BLA::Matrix<9> aPriori = X + (getA() * X) * dt;
 	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 
-	float t[3]; // theta
-	t[0] = atan((double)a.x / a.z);
-	t[1] = atan((double)a.y / a.z);
-	t[2] = aPriori(2); // Twist is not directly observable
-	measureY(t, td); // Measure the output/state (full state feedback (kinda?))
-	signY(aPriori); // Wheel speed is measured so sign it based on the apriori
+	// Note Theta is not directly observed
+	measureY(aPriori, td); // Measure the output/state (full state feedback (kinda?))
 	// State estimation
-	// float prioriGain = 0.5f; // turn up to prioritize prediction
-	// float yGain = 1.0 - prioriGain;
-	BLA::Matrix<9,1> prioriGain = {0.95, 0.95, 0.0, 0.2, 0.2, 0.2, 0.1, 0.1, 0.1};
+	BLA::Matrix<9,1> prioriGain = {0.0, 0.0, 0.0, 0.2, 0.2, 0.2, 0.1, 0.1, 0.1};
 	for(int i = 0; i < 9; i ++) {
 		X(i) = Y(i) + prioriGain(i) * (aPriori(i) - Y(i)); // Sadge no Kaaal
 	}
 }
 
-void Cubic::signY(BLA::Matrix<9> aPriori) // We measure speed not velocity so we must add a sign
+
+void Cubic::measureY(BLA::Matrix<9> aPriori, VectorInt16 td)
 {
+	Y = { aPriori(0), aPriori(1), aPriori(2), -(double)td.y / 7509.87263606, -(double)td.x / 7509.87263606, (double)td.z / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps };
+	// We measure wheel speed not velocity so we infere direction from the aPriori
 	for (int i = 0; i < 3; i++) {
 		if (aPriori(6 + i) < 0) {
 			Y(6 + i) = -Y(6 + i);
 		}
 	}
-}
-
-void Cubic::measureY(float t[3], VectorInt16 td)
-{
-	Y = { -t[0], t[1], t[2], -(double)td.y / 7509.87263606, -(double)td.x / 7509.87263606, (double)td.z / 7509.87263606, motors[0].rps, motors[1].rps, motors[2].rps };
 }
 
 void Cubic::calculateU(float dt)

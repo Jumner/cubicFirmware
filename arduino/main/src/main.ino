@@ -6,15 +6,6 @@
 #include <MPU6050_6Axis_MotionApps20.h>
 #include <PinChangeInterrupt.h>
 
-using namespace BLA;
-
-/*
-Error codes:
-0: Unassigned
-1: imu connection failed
-2: DMP init failed
-*/
-
 Cubic cube = Cubic();
 unsigned long time;
 MPU6050 imu;

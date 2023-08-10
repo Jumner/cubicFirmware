@@ -11,7 +11,7 @@ Motor::Motor(int n)
   pinMode(pwm, OUTPUT);
 
   // Set default values
-  currentDir = LOW;
+  currentDir = LOW; // Counter Clockwise (-torque)
   digitalWrite(cw, currentDir);
   analogWrite(pwm, 255); // Off
 }
@@ -25,7 +25,7 @@ void Motor::interrupt(void)
 void Motor::setPwm(int val, bool dir)
 {
   if (dir != currentDir) { // Changed Directions
-    digitalWrite(dir); // Write new direction (HIGH == True == 0x1, LOW == False == 0x0)
+    digitalWrite(cw, dir); // Write new direction (HIGH == True == 0x1, LOW == False == 0x0)
     currentDir = dir; // Update current dir
   }
   analogWrite(pwm, val); // Write pwm value
@@ -47,11 +47,10 @@ int Motor::maxTorque(double vel)
 
 void Motor::setTorque(double t, double vel)
 {
-  if (t < 0)
-  {
-    vel *= -1; // make velocity relative
-  }
-  double decimalVal = abs(t / maxTorque(vel)); // This ratio might be negative (maxtorque is always > 0)
+  double decimalVal =
+      abs(t / maxTorque(t > 0 ? vel : -vel)); // This ratio might be negative
+                                              // (maxtorque is always > 0)
+  // Also negate velocity when negative torques are needed to make it relative
   int val = 245 - 245 * max(min(decimalVal, 1), 0);
   setPwm(val, t > 0);
 }

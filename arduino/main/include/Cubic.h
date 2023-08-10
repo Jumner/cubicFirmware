@@ -22,5 +22,4 @@ class Cubic // 462 bytes
 	void run(VectorInt16 a, VectorInt16 td, float dt);
 
 	Cubic();
-	~Cubic();
 };

@@ -15,19 +15,10 @@ Motor::Motor(int n)
   analogWrite(pwm, 255); // Off
 }
 
-Motor::~Motor()
-{
-  // Serial.println("Destructed Motor");
-}
-
 void Motor::interrupt(void)
 {
-  // if (digitalRead(tach))
-  // {
-  oldrps = rps;
   rps = 31415.9 / (micros() - oldTime);
   oldTime = micros();
-  // }
 }
 
 void Motor::setPwm(int val, bool dir)
@@ -52,7 +43,7 @@ bool Motor::stop(float vel) {
   return true; // Not done, keep calling
 }
 
-static int Motor::maxTorque(double vel)
+int Motor::maxTorque(double vel)
 {
   return 0.0625 - 0.000743 * vel - 0.00000348 * vel * vel + 0.0000000429 * vel * vel * vel;
 }
@@ -63,7 +54,7 @@ void Motor::setTorque(double t, double vel)
   {
     vel *= -1; // make velocity relative
   }
-  double decimalVal = abs(t / maxTorque(vel));
+  double decimalVal = abs(t / maxTorque(vel)); // This ratio might be negative (maxtorque is always > 0)
   int val = 245 - 245 * max(min(decimalVal, 1), 0);
   setPwm(val, t > 0);
 }

@@ -23,11 +23,8 @@ using namespace BLA;
 Cubic::Cubic()
 {
 	// Set timers
-	TCCR1B = TCCR1B & B11111000 | B00000001; // 9 & 10
-	TCCR2B = TCCR2B & B11111000 | B00000001; // 11
-}
-Cubic::~Cubic()
-{
+	TCCR1B = (TCCR1B & B11111000) | B00000001; // 9 & 10
+	TCCR2B = (TCCR2B & B11111000) | B00000001; // 11
 }
 
 void Cubic::calculateX(VectorInt16 a, VectorInt16 td, float dt)
@@ -109,9 +106,9 @@ void Cubic::calculateU(float dt)
 	// Limit max torque to improve apriori accuracy
 	for(int i = 0; i < 3; i ++) {
 		if(U(i) > 0) { // Positive Torque
-			U(i) = min(Motor::MaxTorque(vel), U(i));
+			U(i) = min(Motor::maxTorque(X(6+i)), U(i));
 		} else { // Negative Torque
-			U(i) = max(-Motor::maxTorque(-vel), U(i));
+			U(i) = max(-Motor::maxTorque(-X(6+i)), U(i));
 		}
 	}
 }

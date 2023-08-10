@@ -114,6 +114,14 @@ void Cubic::calculateU(float dt)
 	Matrix<3> antiSpinup = { 1.0, 1.0, 1.0 };
 	antiSpinup *= sum * 0.0001; // Simple proportional controller, good performance doesn't matter we just want to avoid spinup
 	U -= antiSpinup; // Apply anti Spinup
+	// Limit max torque to improve apriori accuracy
+	for(int i = 0; i < 3; i ++) {
+		if(U(i) > 0) { // Positive Torque
+			U(i) = min(Motor::MaxTorque(vel), U(i));
+		} else { // Negative Torque
+			U(i) = max(-Motor::maxTorque(-vel), U(i));
+		}
+	}
 }
 
 BLA::Matrix<9, 9> Cubic::getA()

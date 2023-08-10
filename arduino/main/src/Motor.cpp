@@ -52,13 +52,18 @@ bool Motor::stop(float vel) {
   return true; // Not done, keep calling
 }
 
+static int Motor::maxTorque(double vel)
+{
+  return 0.0625 - 0.000743 * vel - 0.00000348 * vel * vel + 0.0000000429 * vel * vel * vel;
+}
+
 void Motor::setTorque(double t, double vel)
 {
   if (t < 0)
   {
     vel *= -1; // make velocity relative
   }
-  double decimalVal = abs(t / (0.0625 - 0.000743 * vel - 0.00000348 * vel * vel + 0.0000000429 * vel * vel * vel));
+  double decimalVal = abs(t / maxTorque(vel));
   int val = 245 - 245 * max(min(decimalVal, 1), 0);
   setPwm(val, t > 0);
 }

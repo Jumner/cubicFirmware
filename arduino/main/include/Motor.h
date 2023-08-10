@@ -14,6 +14,7 @@ public:
   void interrupt();
   void setPwm(int val, bool dir);
   void setTorque(double t, double vel);
+  static int maxTorque(double vel);
   bool stop(float vel);
   double rps;    // 8 bytes
   double oldrps; // 8 bytes

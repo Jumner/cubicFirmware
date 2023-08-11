@@ -40,11 +40,11 @@ void setup() {
   imu.setYGyroOffset(11);
   imu.setZGyroOffset(-5);
 
-  // Attach tachometer interrupts
-  attachPCINT(digitalPinToPCINT(cube.motors[0].tach), int2,
-              RISING); // Pin 2 is mpu interrupt
-  attachPCINT(digitalPinToPCINT(cube.motors[1].tach), int1, RISING);
-  attachPCINT(digitalPinToPCINT(cube.motors[2].tach), int0, RISING);
+  // Attach tachometer interrupts (Pin 2 is mpu interrupt)
+
+  attachPCINT(digitalPinToPCINT(cube.motors[0].tach), int0, RISING); // 8
+  attachPCINT(digitalPinToPCINT(cube.motors[1].tach), int1, RISING); // 4
+  attachPCINT(digitalPinToPCINT(cube.motors[2].tach), int2, RISING); // 3
 
   if (LOGGING) {
     Serial.println("time,x,y,z,wx,wy,wz,m0,m1,m2,u0,u1,u2");
@@ -52,6 +52,10 @@ void setup() {
   delay(1000);
   time = micros();
 }
+
+void int0(void) { cube.motors[0].interrupt(); }
+void int1(void) { cube.motors[1].interrupt(); }
+void int2(void) { cube.motors[2].interrupt(); }
 
 void log() {
   Serial.print(((double)time / 1000000) - 2);
@@ -82,10 +86,6 @@ void loop() {
     }
   }
 }
-
-void int0(void) { cube.motors[0].interrupt(); }
-void int1(void) { cube.motors[1].interrupt(); }
-void int2(void) { cube.motors[2].interrupt(); }
 
 void safe(String s) { // Put the chip into a safe mode is something
                       // unrecoverable goes wrong

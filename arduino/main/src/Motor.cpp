@@ -1,7 +1,7 @@
 #include "Motor.h"
 #include <Arduino.h>
 Motor::Motor(int n) {
-  tach = n == 2 ? 8 : 3 + n;
+  tach = n == 0 ? 8 : 5 - n;
   cw = 5 + n;
   pwm = 9 + n;
 

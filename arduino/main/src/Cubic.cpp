@@ -29,13 +29,12 @@ void Cubic::calculateX(VectorInt16 td, float dt)
 {
 	// Calculate A priori (the predicted state based on model)
 	// Note that this is the same as C * aPriori bc we using full state feedback
-	// BLA::Matrix<9> aPriori = X + (getA() * X) * dt;
 	BLA::Matrix<9> aPriori = X + (getA() * X + getB() * U) * dt;
 
 	// Note Theta is not directly observed
 	measureY(aPriori, td); // Measure the output/state (full state feedback (kinda?))
 	// State estimation
-	BLA::Matrix<9,1> prioriGain = {1.0, 1.0, 1.0, 0.2, 0.2, 0.2, 0.1, 0.1, 0.1};
+	BLA::Matrix<9> prioriGain = {1.0, 1.0, 1.0, 0.2, 0.2, 0.2, 0.1, 0.1, 0.1};
 	for(int i = 0; i < 9; i ++) {
 		X(i) = Y(i) + prioriGain(i) * (aPriori(i) - Y(i)); // Sadge no Kaaal
 	}
@@ -91,8 +90,8 @@ void Cubic::calculateU(float dt)
 		 sqrt(6)/3 ,  0.0      ,
 		 -sqrt(6)/6, -sqrt(2)/2 
 	};
-	float uGain = 0.75; // Reduce the impact of high frequency oscillations in the motors (they kinda click)
-	U = U * uGain + transform * pid * (1-uGain); // Apply transform to get required torques
+	float uGain = 0.25; // Reduce the impact of high frequency oscillations in the motors (they kinda click)
+	U = U - U * uGain + transform * pid * uGain; // Apply transform to get required torques
 	// Handle spinup, we want the average wheel velocity to always be zero. U is calculated to not change the average wheel velocity
 	double sum = 0;
 	for(int i = 6; i < 9; i ++) {

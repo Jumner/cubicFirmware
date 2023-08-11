@@ -1,3 +1,6 @@
+# 1 "/tmp/tmpxi_8i4hv"
+#include <Arduino.h>
+# 1 "/home/jumner/Desktop/cubicFirmware/arduino/main/src/main.ino"
 #include "Cubic.h"
 #include "Motor.h"
 #include "Wire.h"
@@ -11,21 +14,28 @@ Cubic cube = Cubic();
 unsigned long time;
 MPU6050 imu;
 
-// orientation/motion vars
-VectorInt16 gyro; // [x, y, z]
 
+VectorInt16 gyro;
+void setup();
+void log();
+void loop();
+void int0(void);
+void int1(void);
+void int2(void);
+void safe(String s);
+#line 17 "/home/jumner/Desktop/cubicFirmware/arduino/main/src/main.ino"
 void setup() {
   Wire.begin();
-  Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having
-                         // compilation difficulties
-  Wire.setWireTimeout(3000, true); // timeout value in uSec (fixes hang issue)
+  Wire.setClock(400000);
+
+  Wire.setWireTimeout(3000, true);
   Serial.begin(38400);
   delay(1000);
   imu.initialize();
 
-  pinMode(8, INPUT); // tach 0
-  pinMode(3, INPUT); // tach 1
-  pinMode(4, INPUT); // tach 2
+  pinMode(8, INPUT);
+  pinMode(3, INPUT);
+  pinMode(4, INPUT);
 
   if (!imu.testConnection())
     safe("IMU");
@@ -40,9 +50,9 @@ void setup() {
   imu.setYGyroOffset(11);
   imu.setZGyroOffset(-5);
 
-  // Attach tachometer interrupts
+
   attachPCINT(digitalPinToPCINT(cube.motors[0].tach), int2,
-              RISING); // Pin 2 is mpu interrupt
+              RISING);
   attachPCINT(digitalPinToPCINT(cube.motors[1].tach), int1, RISING);
   attachPCINT(digitalPinToPCINT(cube.motors[2].tach), int0, RISING);
 
@@ -67,17 +77,17 @@ void log() {
 }
 
 void loop() {
-  // safe("not gonna do stuff");
+
   imu.getRotation(&gyro.x, &gyro.y, &gyro.z);
-  double dt = (micros() - time) / (1000000.0); // In secs
+  double dt = (micros() - time) / (1000000.0);
   time = micros();
-  cube.run(gyro, dt); // "It just works"
+  cube.run(gyro, dt);
   if (LOGGING)
     log();
   for (int i = 0; i < 3; i++) {
-    if (cube.motors[i].rps > MAX_SPEED) { // 90
+    if (cube.motors[i].rps > MAX_SPEED) {
       safe("Motor overspeed");
-    } else if (i != 2 && abs(cube.X(i)) > 0.25) { // 3rd is twist which is fine
+    } else if (i != 2 && abs(cube.X(i)) > 0.25) {
       safe("Fell over");
     }
   }
@@ -87,8 +97,8 @@ void int0(void) { cube.motors[0].interrupt(); }
 void int1(void) { cube.motors[1].interrupt(); }
 void int2(void) { cube.motors[2].interrupt(); }
 
-void safe(String s) { // Put the chip into a safe mode is something
-                      // unrecoverable goes wrong
+void safe(String s) {
+
   Serial.print("Fatal Err: ");
   Serial.println(s);
   float initialRps[3];

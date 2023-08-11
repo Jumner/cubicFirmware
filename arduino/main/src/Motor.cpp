@@ -22,9 +22,8 @@ void Motor::interrupt(void) {
 
 void Motor::setPwm(int val, bool dir) {
   if (dir != currentDir) { // Changed Directions
-    digitalWrite(
-        cw,
-        dir); // Write new direction (HIGH == True == 0x1, LOW == False == 0x0)
+    // Write new direction (HIGH == True == 0x1, LOW == False == 0x0)
+    digitalWrite(cw, dir);
     currentDir = dir; // Update current dir
   }
   analogWrite(pwm, val); // Write pwm value
@@ -32,10 +31,11 @@ void Motor::setPwm(int val, bool dir) {
 
 bool Motor::stop(float vel) {
   // Stop the motor
-  setPwm(255, false);
-  if (rps < 10) {
+  if (rps < 20) {
+    setPwm(255, currentDir);
     return false;
   }
+  setTorque(rps * 0.001 * (vel > 0 ? -1.0 : 1.0), vel > 0 ? rps : -rps);
   return true; // Not done, keep calling
 }
 

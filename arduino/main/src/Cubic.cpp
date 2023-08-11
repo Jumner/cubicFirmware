@@ -154,7 +154,7 @@ void Cubic::run(VectorInt16 td, float dt)
 	motors[2].setTorque(U(2), X(8)); // Right
 }
 
-bool Cubic::stop() {
+bool Cubic::stop(float initialRps[3]) {
   // stop all motors
   bool cont = false;
   for (int i = 0; i < 3; i++) {

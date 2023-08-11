@@ -14,7 +14,7 @@ public:
   float integral[3] = {0.0, 0.0};
   void measureY(BLA::Matrix<9> aPriori, VectorInt16 td);
   void calculateU(float dt);
-  bool stop();
+  bool stop(float initialRps[3]);
   BLA::Matrix<9, 9> getA();
   BLA::Matrix<9, 3> getB();
   void calculateX(VectorInt16 td, float dt);

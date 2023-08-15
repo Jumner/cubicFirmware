@@ -54,22 +54,23 @@ void Cubic::measureY(BLA::Matrix<9> aPriori, VectorInt16 td)
 
 void Cubic::calculateU(float dt)
 {
-	BLA::Matrix<2> pid = { 0.0, 0.0 };
+	BLA::Matrix<3> pid = { 0.0, 0.0, 0.0 };
 	BLA::Matrix<6> state = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // State used for control x_angle,y_angle,x_dot,y_dot,x_wheelspeed,y_wheelspeed
 	BLA::Matrix<2> gravity = { 0.0, 0.0 };
 	
-	BLA::Matrix<2,3> wheelTransform = {
+	BLA::Matrix<3,3> wheelTransform = {
     -sqrt(6)/6, sqrt(6)/3, -sqrt(6)/6,
-    sqrt(2)/2 , 0.0      , -sqrt(2)/2
+    sqrt(2)/2 , 0.0      , -sqrt(2)/2,
+		sqrt(3)/3, sqrt(3)/3, sqrt(3)/3
 	};
 
-	BLA::Matrix<3> wheel3 = {X(6), X(7), X(8)};
-	BLA::Matrix<2> wheels = wheelTransform * wheel3; // Decompose the three wheel velocities into its X and Y components
+	BLA::Matrix<3> wheelMotor = {X(6), X(7), X(8)};
+	BLA::Matrix<3> wheelAxis = wheelTransform * wheelMotor; // Decompose the three wheel velocities into its X and Y components
 
 	for (int i = 0; i < 2; i++) {
 		state(i)   = X(i);      // X/Y angle
 		state(i+2) = X(i + 3);  // X/Y dot
-		state(i+4) = wheels(i); // X/Y Wheel
+		state(i+4) = wheelAxis(i); // X/Y Wheel
 
 		// X/Y Control
 		// First we feed forward gravity to linearize the control response
@@ -83,23 +84,17 @@ void Cubic::calculateU(float dt)
 		// Use the wheel speed to infer sensor tilt
 		spCorrect[i] += state(i + 4) * sp * dt; // Move the set point correct
 	}
-	// Transform x,y torque to motor torques
+	// Handle spinup, we want the average wheel velocity to always be zero. U is calculated to not change the average wheel velocity
+	pid(2) = wheelAxis(2) * -0.0001;
+	// Transform x,y,z torque to motor torques
 	// Note my convention here (this will haunt me) x/0 is the rotation around the Y axis. y/1 is the rotation around the X axis
 	BLA::Matrix<3,2> transform = {
-		 -sqrt(6)/6, sqrt(2)/2,
-		 sqrt(6)/3 ,  0.0      ,
-		 -sqrt(6)/6, -sqrt(2)/2 
+		 -sqrt(6)/6, sqrt(2)/2, sqrt(3)/3,
+		 sqrt(6)/3 ,  0.0      , sqrt(3)3,
+		 -sqrt(6)/6, -sqrt(2)/2, sqrt(3)/3
 	};
 	float uGain = 0.25; // Reduce the impact of high frequency oscillations in the motors (they kinda click)
 	U = U - U * uGain + transform * pid * uGain; // Apply transform to get required torques
-	// Handle spinup, we want the average wheel velocity to always be zero. U is calculated to not change the average wheel velocity
-	double sum = 0;
-	for(int i = 6; i < 9; i ++) {
-		sum += X(i); // Sum wheel rates
-	}
-	BLA::Matrix<3> antiSpinup = { 1.0, 1.0, 1.0 };
-	antiSpinup *= sum * 0.0001; // Simple proportional controller, good performance doesn't matter we just want to avoid spinup
-	U -= antiSpinup; // Apply anti Spinup
 	// Limit max torque to improve apriori accuracy
 	for(int i = 0; i < 3; i ++) {
 		if(U(i) > 0) { // Positive Torque

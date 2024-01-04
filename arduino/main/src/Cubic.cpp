@@ -13,6 +13,7 @@
 #define kd 6.877099164695932
 #define kw 0.004203415590498105
 #define sp 0.0006934966326738897
+
 // #define kp 0.0
 // #define kd 0.0
 // #define kw 0.0
@@ -34,7 +35,7 @@ void Cubic::calculateX(VectorInt16 td, float dt)
 	// Note Theta is not directly observed
 	measureY(aPriori, td); // Measure the output/state (full state feedback (kinda?))
 	// State estimation
-	BLA::Matrix<9> prioriGain = {1.0, 1.0, 1.0, 0.2, 0.2, 0.2, 0.1, 0.1, 0.1};
+	BLA::Matrix<9> prioriGain = {1.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.1, 0.1, 0.1};
 	for(int i = 0; i < 9; i ++) {
 		X(i) = Y(i) + prioriGain(i) * (aPriori(i) - Y(i)); // Sadge no Kaaal
 	}
@@ -55,7 +56,6 @@ void Cubic::measureY(BLA::Matrix<9> aPriori, VectorInt16 td)
 void Cubic::calculateU(float dt)
 {
 	BLA::Matrix<3> pid = { 0.0, 0.0, 0.0 };
-	BLA::Matrix<6> state = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // State used for control x_angle,y_angle,x_dot,y_dot,x_wheelspeed,y_wheelspeed
 	BLA::Matrix<2> gravity = { 0.0, 0.0 };
 	
 	BLA::Matrix<3,3> wheelTransform = {
@@ -68,6 +68,7 @@ void Cubic::calculateU(float dt)
 	BLA::Matrix<3> wheelAxis = wheelTransform * wheelMotor; // Decompose the three wheel velocities into its X and Y components
 
 	for (int i = 0; i < 2; i++) {
+		BLA::Matrix<6> state = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // State used for control x_angle,y_angle,x_dot,y_dot,x_wheelspeed,y_wheelspeed
 		state(i)   = X(i);      // X/Y angle
 		state(i+2) = X(i + 3);  // X/Y dot
 		state(i+4) = wheelAxis(i); // X/Y Wheel
@@ -85,22 +86,27 @@ void Cubic::calculateU(float dt)
 		spCorrect[i] += state(i + 4) * sp * dt; // Move the set point correct
 	}
 	// Handle spinup, we want the average wheel velocity to always be zero. U is calculated to not change the average wheel velocity
-	pid(2) = wheelAxis(2) * -0.0001;
+	// pid(2) = wheelAxis(2) * -0.001 - X(2) * 0.0;
+	pid(2) = 0;
 	// Transform x,y,z torque to motor torques
 	// Note my convention here (this will haunt me) x/0 is the rotation around the Y axis. y/1 is the rotation around the X axis
-	BLA::Matrix<3,2> transform = {
+	BLA::Matrix<3,3> transform = {
 		 -sqrt(6)/6, sqrt(2)/2, sqrt(3)/3,
-		 sqrt(6)/3 ,  0.0      , sqrt(3)3,
+		 sqrt(6)/3 ,  0.0      , sqrt(3)/3,
 		 -sqrt(6)/6, -sqrt(2)/2, sqrt(3)/3
 	};
-	float uGain = 0.25; // Reduce the impact of high frequency oscillations in the motors (they kinda click)
+	float uGain = 0.10; // Reduce the impact of high frequency oscillations in the motors (they kinda click)
 	U = U - U * uGain + transform * pid * uGain; // Apply transform to get required torques
-	// Limit max torque to improve apriori accuracy
+	// Smart actuator saturation to prevent twist and have better model accuracy
+	double maxSaturation = 0;
+	double threshhold = 1.0;
 	for(int i = 0; i < 3; i ++) {
-		if(U(i) > 0) { // Positive Torque
-			U(i) = min(Motor::maxTorque(X(6+i)), U(i));
-		} else { // Negative Torque
-			U(i) = max(-Motor::maxTorque(-X(6+i)), U(i));
+		maxSaturation = max(maxSaturation, U(i) / Motor::maxTorque(X(6+i), U(i)));
+	}
+	maxSaturation /= threshhold;
+	if (maxSaturation > 1) { // At least one actuator is saturated
+		for(int i = 0; i < 3; i ++) {
+			U(i) /= maxSaturation; // Scale down so the most saturated one is perfectly saturated
 		}
 	}
 }

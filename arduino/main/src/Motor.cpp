@@ -31,6 +31,8 @@ void Motor::setPwm(int val, bool dir) {
 
 bool Motor::stop(float vel) {
   // Stop the motor
+  setPwm(255, currentDir);
+  return false;
   if (rps < 20) {
     setPwm(255, currentDir);
     return false;
@@ -39,14 +41,17 @@ bool Motor::stop(float vel) {
   return true; // Not done, keep calling
 }
 
-int Motor::maxTorque(double vel) {
-  return 0.0625 - 0.000743 * vel - 0.00000348 * vel * vel +
-         0.0000000429 * vel * vel * vel;
+double Motor::maxTorque(double vel, double torqueDirection) {
+  if(torqueDirection < 0) {
+    vel *= -1;
+  }
+  double torque = 0.0625 - 0.000743 * vel - 0.00000348 * vel * vel + 0.0000000429 * vel * vel * vel;
+  return torqueDirection < 0 ? -torque : torque;
 }
 
 void Motor::setTorque(double t, double vel) {
   double decimalVal =
-      abs(t / maxTorque(t > 0 ? vel : -vel)); // This ratio might be negative
+      abs(t / maxTorque(vel, t)); // This ratio might be negative
                                               // (maxtorque is always > 0)
   // Also negate velocity when negative torques are needed to make it relative
   int val = 245 - 245 * max(min(decimalVal, 1), 0);

@@ -2,4 +2,4 @@
 #define LOGGING true
 
 // Wheel speed to safe. (Set below 20 to desable controlled slow)
-#define MAX_SPEED 40
+#define MAX_SPEED 90

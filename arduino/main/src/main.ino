@@ -47,7 +47,7 @@ void setup() {
   attachPCINT(digitalPinToPCINT(cube.motors[2].tach), int2, RISING); // 3
 
   if (LOGGING) {
-    Serial.println("time,x,y,z,wx,wy,wz,m0,m1,m2,u0,u1,u2");
+    Serial.println("time,x,y,z,wx,wy,wz,m0,m1,m2,u0,u1,u2,spx,spy");
   }
   delay(1000);
   time = micros();
@@ -66,6 +66,10 @@ void log() {
   for (int i = 0; i < 3; i++) {
     Serial.print(",");
     Serial.print(cube.U(i), 6);
+  }
+  for(int i = 0; i < 2; i ++) {
+    Serial.print(",");
+    Serial.print(cube.spCorrect[i], 6);
   }
   Serial.println();
 }

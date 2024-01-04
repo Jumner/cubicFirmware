@@ -12,10 +12,10 @@ spErr = 0
 
 # System Dynamics
 
-# kp = 15.049274123133 # 0.0331144234778782
-# kd = 5.185336206253
-# kw = 0.000849371184
-# sp = 0.000890151154
+kp = 15.049274123133 # 0.0331144234778782
+kd = 5.185336206253
+kw = 0.000849371184
+sp = 0.000890151154
 
 # kp = 15.075736401053888
 # kd = 4.990126644141603
@@ -112,10 +112,10 @@ spErr = 0
 # sp = -0.00045934980222573843
 # Cost = 0.7213355364569924
 
-kp = 16.524391599478232
-kd = 15.836384061261285
-kw = 0.004510714990687427
-sp = 0.000866997945294915
+# kp = 16.524391599478232
+# kd = 15.836384061261285
+# kw = 0.004510714990687427
+# sp = 0.000866997945294915
 
 # kp = 5.680027343459856
 # kd = 5.174699842994684
@@ -132,7 +132,6 @@ lastU = 0
 lastTime = 0
 function f(dθ, θ, p, t)
     
-    println(t)
     w = θ[3] * ws
     if t - lastTime >= 0
         torque = 0.0625 - 0.000743 * w - 0.00000348 * w^2 + 0.0000000429 * w^3
@@ -155,10 +154,10 @@ end
 
 # Initial Conditions
 # x0 = [0.0, 0.0, 50.0, 0.01]  # Initial state ([θ, θ_dot])
-x0 = [0.01, 0.0, 0.0, 0.0]  # Initial state ([θ, θ_dot])
+x0 = [0.0, 0.0, 0.0, 0.0]  # Initial state ([θ, θ_dot])
 
 # Time Span
-tspan = (0.0, 60.0)  # Simulation time span
+tspan = (0.0, 6.0)  # Simulation time span
 
 
 # Define the ODE Problem
@@ -169,7 +168,7 @@ oldCost = 1
 spErrPrec = 9
 
 function cost()
-    global spErr = 0.02
+    global spErr = 0.01
     global lastU = 0
     global lastTime = 0
     global sol = solve(prob)
@@ -243,7 +242,7 @@ function getch()
     c
 end
 
-rate = 0.001
+rate = 0.00001
 while true
     print("Cost = ")
     println(cost())

@@ -14,7 +14,7 @@ public:
   void interrupt();
   void setPwm(int val, bool dir);
   void setTorque(double t, double vel);
-  static int maxTorque(double vel);
+  static double maxTorque(double vel, double torqueDirecction);
   bool stop(float vel);
   double rps; // 8 bytes
 };

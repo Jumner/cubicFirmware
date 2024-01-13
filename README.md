@@ -87,7 +87,7 @@ The first real "failure" of the project (if you must call it that). I wanted to 
 </p>
 <p align="center">
 <img src="https://raw.githubusercontent.com/Jumner/cubicFirmware/main/images/pcb1.png" height="400px" alt="PCB layout"/>
-<img src="https://raw.githubusercontent.com/Jumner/cubicFirmware/main/images/pcb.jpg" height="400px" alt="Final board"/>
+<img src="https://raw.githubusercontent.com/Jumner/cubicFirmware/main/images/pcb.png" height="400px" alt="Final board"/>
 </p>
 <br>
 I should have realized just by looking at it that the components were too small (look at those tiny components in the top right of the board). Regardless, it was an amazing experience and I learned so much about electronics.
